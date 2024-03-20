@@ -1,0 +1,94 @@
+package com.nailsbyliz.reservation.web;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.nailsbyliz.reservation.domain.AppUserEntity;
+import com.nailsbyliz.reservation.domain.AppUserRepository;
+import com.nailsbyliz.reservation.service.AppUserService;
+import com.nailsbyliz.reservation.service.AuthService;
+
+@RestController
+@RequestMapping("/api/users")
+public class AppUserRestController {
+
+    @Autowired
+    AppUserRepository userRepo;
+
+    @Autowired
+    AppUserService userService;
+
+    @Autowired
+    AuthService authService;
+
+    // Get all users
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Iterable<AppUserEntity>> get() {
+        Iterable<AppUserEntity> appUsers = userRepo.findAll();
+        return ResponseEntity.ok(appUsers);
+    }
+
+    // Get a specific user
+    @GetMapping("/{appUserId}")
+    public ResponseEntity<AppUserEntity> getaAppUserById(@PathVariable Long userId) {
+        AppUserEntity appUser = userService.getUserById(userId);
+        if (appUser != null) {
+            return ResponseEntity.ok(appUser);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Create a new user
+    @PostMapping
+    public ResponseEntity<AppUserEntity> createAppUser(@RequestBody AppUserEntity createdAppUser) {
+        AppUserEntity creaAppUser = userService.createUser(createdAppUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creaAppUser);
+    }
+
+    // Edit a user
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AppUserEntity> updateAppUser(@PathVariable Long userId,
+            @RequestBody AppUserEntity updatedAppUser) {
+        AppUserEntity result = userService.updateUser(userId, updatedAppUser);
+
+        if (result != null) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Delete a user
+    @DeleteMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteAppUser(@PathVariable Long userId) {
+        boolean deleted = userService.deleteUser(userId);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    // Change password
+    @PutMapping("/password")
+    public ResponseEntity<AppUserEntity> updatePassword(@RequestBody AppUserEntity updatedAppUser) {
+        AppUserEntity currentUser = authService.getCurrentUser();
+        AppUserEntity user = userService.changePassword(currentUser.getId(), updatedAppUser);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+}
