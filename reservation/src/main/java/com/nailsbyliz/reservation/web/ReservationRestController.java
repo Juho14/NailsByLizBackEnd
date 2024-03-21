@@ -83,6 +83,7 @@ public class ReservationRestController {
             dto.setFName(reservation.getFName());
             dto.setLName(reservation.getLName());
             dto.setEmail(reservation.getEmail());
+            dto.setPhone(reservation.getPhone());
             dto.setStartTime(reservation.getStartTime());
             dto.setEndTime(reservation.getEndTime());
             dto.setNailService(reservation.getNailService());

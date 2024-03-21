@@ -23,6 +23,7 @@ public class NailServiceEntity {
     private String type;
     private int duration;
     private double price;
+    private boolean AdminService;
 
     @OneToMany(mappedBy = "nailService")
     @JsonIgnore
@@ -31,10 +32,11 @@ public class NailServiceEntity {
     public NailServiceEntity() {
     }
 
-    public NailServiceEntity(String type, int length, double price) {
+    public NailServiceEntity(String type, int duration, double price, boolean AdminService) {
         this.type = type;
-        this.duration = length;
+        this.duration = duration;
         this.price = price;
+        this.AdminService = AdminService;
     }
 
     public Long getId() {
@@ -65,13 +67,34 @@ public class NailServiceEntity {
         this.price = price;
     }
 
+    public boolean isAdminService() {
+        return this.AdminService;
+    }
+
+    public boolean getAdminService() {
+        return this.AdminService;
+    }
+
+    public void setAdminService(boolean AdminService) {
+        this.AdminService = AdminService;
+    }
+
+    public List<ReservationEntity> getReservations() {
+        return this.reservations;
+    }
+
+    public void setReservations(List<ReservationEntity> reservations) {
+        this.reservations = reservations;
+    }
+
     @Override
     public String toString() {
         return "{" +
                 " id='" + getId() + "'" +
                 ", type='" + getType() + "'" +
-                ", length='" + getDuration() + "'" +
+                ", duration='" + getDuration() + "'" +
                 ", price='" + getPrice() + "'" +
+                ", AdminService='" + isAdminService() + "'" +
                 "}";
     }
 

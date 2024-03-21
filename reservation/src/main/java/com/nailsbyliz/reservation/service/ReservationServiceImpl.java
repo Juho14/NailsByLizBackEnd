@@ -1,12 +1,18 @@
 package com.nailsbyliz.reservation.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nailsbyliz.reservation.domain.NailServiceEntity;
+import com.nailsbyliz.reservation.domain.NailServiceRepository;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.domain.ReservationRepository;
 
@@ -16,12 +22,35 @@ public class ReservationServiceImpl implements ReservationService {
     @Autowired
     ReservationRepository reservationRepository;
 
+    @Autowired
+    NailServiceRepository nailRepo;
+
     @Override
     public ReservationEntity saveReservation(ReservationEntity reservation) {
         LocalDateTime startTime = reservation.getStartTime();
         int durationMinutes = reservation.getNailService().getDuration();
         LocalDateTime endDateTime = startTime.plusMinutes(durationMinutes);
         reservation.setEndTime(endDateTime);
+
+        Long serviceId = reservation.getNailService().getId();
+        NailServiceEntity nailService = nailRepo.findById(serviceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
+
+        reservation.setNailService(nailService);
+
+        List<ReservationEntity> reservationsOfDay = getReservationsByDay(
+                Date.from(reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
+        if (!reservationsOfDay.isEmpty()) {
+            for (ReservationEntity r : reservationsOfDay) {
+                if (startTime.isAfter(r.getEndTime()) || endDateTime.isBefore(r.getStartTime())) {
+                    // Checks if there are overlaps. If not, the entity will be saved.
+                    continue;
+                } else {
+                    throw new IllegalArgumentException("The new reservation overlaps with an existing reservation.");
+                }
+            }
+        }
+
         return reservationRepository.save(reservation);
     }
 
@@ -57,5 +86,20 @@ public class ReservationServiceImpl implements ReservationService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public List<ReservationEntity> getReservationsByDay(Date day) {
+        List<ReservationEntity> reservationsOfDay = new ArrayList<>();
+        Iterable<ReservationEntity> existingReservations = reservationRepository.findAll();
+
+        for (ReservationEntity r : existingReservations) {
+            Date dateOfExisting = Date.from(r.getStartTime().atZone(ZoneId.systemDefault()).toInstant());
+            if (dateOfExisting.compareTo(day) == 0) {
+                reservationsOfDay.add(r);
+            }
+        }
+
+        return reservationsOfDay;
     }
 }

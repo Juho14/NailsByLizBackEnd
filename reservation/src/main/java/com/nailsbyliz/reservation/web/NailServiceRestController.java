@@ -1,9 +1,13 @@
 package com.nailsbyliz.reservation.web;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nailsbyliz.reservation.domain.AppUserEntity;
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.domain.NailServiceRepository;
+import com.nailsbyliz.reservation.dto.NailServiceAdminDTO;
+import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
+import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.NailService;
 
 @RestController
@@ -27,11 +35,60 @@ public class NailServiceRestController {
     @Autowired
     NailService nailService;
 
+    @Autowired
+    AuthService authService;
+
     // To show all available services
     @GetMapping
-    public ResponseEntity<Iterable<NailServiceEntity>> get() {
+    public ResponseEntity<?> getAllNailServices(Authentication authentication) {
         Iterable<NailServiceEntity> services = nailRepo.findAll();
-        return ResponseEntity.ok(services);
+        // Initiate the response variable
+        List<?> response;
+        // Logic to determine if the user is an admin based on authentication
+        try {
+            AppUserEntity user = authService.getCurrentUser();
+
+            if (user.getRole().equalsIgnoreCase(("ADMIN"))) {
+                response = mapToAdminDTOs(services);
+            } else {
+                response = mapToCustomerDTOs(services);
+            }
+        } catch (Exception e) {
+            response = mapToCustomerDTOs(services);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    private List<NailServiceAdminDTO> mapToAdminDTOs(Iterable<NailServiceEntity> services) {
+        List<NailServiceAdminDTO> dtos = new ArrayList<>();
+        for (NailServiceEntity service : services) {
+            NailServiceAdminDTO dto = new NailServiceAdminDTO();
+            dto.setId(service.getId());
+            dto.setType(service.getType());
+            dto.setDuration(service.getDuration());
+            dto.setPrice(service.getPrice());
+            dto.setAdminService(service.isAdminService());
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    private List<NailServiceCustomerDTO> mapToCustomerDTOs(Iterable<NailServiceEntity> services) {
+        List<NailServiceCustomerDTO> dtos = new ArrayList<>();
+        for (NailServiceEntity service : services) {
+            // Skip all admin-only services
+            if (service.isAdminService()) {
+                continue;
+            }
+            NailServiceCustomerDTO dto = new NailServiceCustomerDTO();
+            dto.setId(service.getId());
+            dto.setType(service.getType());
+            dto.setDuration(service.getDuration());
+            dto.setPrice(service.getPrice());
+            dtos.add(dto);
+        }
+        return dtos;
     }
 
     // To show a specific service

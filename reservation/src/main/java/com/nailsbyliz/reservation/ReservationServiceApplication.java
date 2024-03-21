@@ -50,12 +50,14 @@ public class ReservationServiceApplication {
 			appUserService.createUser(admin);
 			appUserService.createUser(dev);
 			appUserService.createUser(testCustomer);
-			NailServiceEntity gelPolish = new NailServiceEntity("GelPolish", 180, 35);
-			NailServiceEntity gelMaintenance = new NailServiceEntity("GelMaintenance", 360, 80);
-			NailServiceEntity gelRemoval = new NailServiceEntity("GelRemoval", 120, 20);
+			NailServiceEntity gelPolish = new NailServiceEntity("GelPolish", 180, 35, false);
+			NailServiceEntity gelMaintenance = new NailServiceEntity("GelMaintenance", 360, 80, false);
+			NailServiceEntity gelRemoval = new NailServiceEntity("GelRemoval", 120, 20, false);
+			NailServiceEntity dayOff = new NailServiceEntity("DayOff", 420, 0, true);
 			nailRepo.save(gelPolish);
 			nailRepo.save(gelMaintenance);
 			nailRepo.save(gelRemoval);
+			nailRepo.save(dayOff);
 
 			LocalTime openingHour = LocalTime.of(11, 0);
 			LocalTime closingHour = LocalTime.of(18, 0);
@@ -71,6 +73,7 @@ public class ReservationServiceApplication {
 			reservation1.setFName("John");
 			reservation1.setLName("Doe");
 			reservation1.setEmail("john.doe@example.com");
+			reservation1.setPhone("1239874658");
 			reservation1.setStartTime(firstAppointment);
 			reservation1.setNailService(gelPolish);
 			reservation1.setStatus("OK");
@@ -79,6 +82,7 @@ public class ReservationServiceApplication {
 			reservation2.setFName("Jane");
 			reservation2.setLName("Smith");
 			reservation2.setEmail("jane.smith@example.com");
+			reservation2.setPhone("9348877193");
 			reservation2.setStartTime(secondAppointment);
 			reservation2.setNailService(gelMaintenance);
 			reservation2.setStatus("OK");
@@ -87,6 +91,7 @@ public class ReservationServiceApplication {
 			reservation3.setFName("Alice");
 			reservation3.setLName("Johnson");
 			reservation3.setEmail("alice.johnson@example.com");
+			reservation3.setPhone("9812983722");
 			reservation3.setStartTime(thirdAppointment);
 			reservation3.setNailService(gelRemoval);
 			reservation3.setStatus("OK");

@@ -1,5 +1,8 @@
 package com.nailsbyliz.reservation.service;
 
+import java.util.Date;
+import java.util.List;
+
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 
 public interface ReservationService {
@@ -10,4 +13,6 @@ public interface ReservationService {
     ReservationEntity updateReservation(Long reservationId, ReservationEntity updatedReservation);
 
     boolean deleteReservation(Long reservationId);
+
+    List<ReservationEntity> getReservationsByDay(Date date);
 }

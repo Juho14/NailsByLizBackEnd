@@ -9,6 +9,7 @@ public class ReservationAdminDTO {
     private String fName;
     private String lName;
     private String email;
+    private String phone;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private NailServiceEntity nailService;
@@ -44,6 +45,14 @@ public class ReservationAdminDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhone() {
+        return this.phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public LocalDateTime getStartTime() {

@@ -21,6 +21,7 @@ public class ReservationEntity {
     private String fName;
     private String lName;
     private String email;
+    private String phone;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -33,11 +34,13 @@ public class ReservationEntity {
     public ReservationEntity() {
     }
 
-    public ReservationEntity(String fName, String lName, String email, LocalDateTime startTime, LocalDateTime endTime,
+    public ReservationEntity(String fName, String lName, String email, String phone, LocalDateTime startTime,
+            LocalDateTime endTime,
             NailServiceEntity nailService, String status) {
         this.fName = fName;
         this.lName = lName;
         this.email = email;
+        this.phone = phone;
         this.startTime = startTime;
         this.endTime = endTime;
         this.nailService = nailService;
@@ -70,6 +73,14 @@ public class ReservationEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhone() {
+        return this.phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public LocalDateTime getStartTime() {
