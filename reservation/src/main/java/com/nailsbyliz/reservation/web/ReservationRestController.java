@@ -1,6 +1,5 @@
 package com.nailsbyliz.reservation.web;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +25,7 @@ import com.nailsbyliz.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/api/reservations")
+@PreAuthorize("hasRole('ADMIN')")
 public class ReservationRestController {
 
     @Autowired
@@ -39,16 +39,9 @@ public class ReservationRestController {
 
     // To show all reservations
     @GetMapping
-    public ResponseEntity<?> getReservations(Principal principal) {
-        boolean isAdmin = false;
-
-        // Logic to determine if the user is an admin based on principal
-        if (principal != null) {
-            String role = authService.getCurrentUser().getRole();
-            if (role.equalsIgnoreCase("admin")) {
-                isAdmin = true;
-            }
-        }
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getReservations() {
+        boolean isAdmin = authService.isAdmin();
 
         Iterable<ReservationEntity> reservations = reservationRepository.findAll();
         List<?> response;
@@ -113,7 +106,6 @@ public class ReservationRestController {
     }
 
     @PutMapping("/{reservationId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReservationEntity> updateReservation(@PathVariable Long reservationId,
             @RequestBody ReservationEntity updatedReservation) {
         ReservationEntity result = reservationService.updateReservation(reservationId, updatedReservation);
@@ -125,7 +117,6 @@ public class ReservationRestController {
     }
 
     @DeleteMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId) {
         boolean deleted = reservationService.deleteReservation(reservationId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();

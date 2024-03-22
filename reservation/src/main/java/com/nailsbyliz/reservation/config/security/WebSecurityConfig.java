@@ -1,9 +1,10 @@
-package com.nailsbyliz.reservation;
+package com.nailsbyliz.reservation.config.security;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.*;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,7 +36,9 @@ public class WebSecurityConfig {
                         .requestMatchers(antMatcher("/login")).permitAll()
                         .requestMatchers(antMatcher("/h2-console/**")).permitAll()
                         .requestMatchers(antMatcher("/api/**")).permitAll()
-                        .requestMatchers(antMatcher("/api/reservations/**")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.GET, "/api/reservations")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/reservations")).permitAll()
+                        .requestMatchers(antMatcher("/api/reservationsettings/active")).permitAll()
                         /*
                          * .requestMatchers(antMatcher(HttpMethod.GET,
                          * "/api/reservations/**")).permitAll()

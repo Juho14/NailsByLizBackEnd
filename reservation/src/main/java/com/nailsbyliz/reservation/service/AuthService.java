@@ -6,4 +6,6 @@ public interface AuthService {
     AppUserEntity getCurrentUser();
 
     String login();
+
+    boolean isAdmin();
 }

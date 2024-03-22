@@ -1,29 +1,18 @@
 package com.nailsbyliz.reservation.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
-@Entity
+@DynamoDbBean
 public class AppUserEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
-
     private String fName;
     private String lName;
     private String username;
     private String phone;
     private String email;
-
-    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
-
-    @Column(name = "role", nullable = false)
     private String role;
 
     public AppUserEntity() {
@@ -40,8 +29,13 @@ public class AppUserEntity {
         this.role = role;
     }
 
+    @DynamoDbPartitionKey
     public Long getId() {
         return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFName() {

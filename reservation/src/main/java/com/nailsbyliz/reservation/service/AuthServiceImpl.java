@@ -29,6 +29,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public boolean isAdmin() {
+        try {
+            AppUserEntity user = getCurrentUser();
+            return user.getRole().equalsIgnoreCase("ADMIN");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public String login() {
         return "login";
     }

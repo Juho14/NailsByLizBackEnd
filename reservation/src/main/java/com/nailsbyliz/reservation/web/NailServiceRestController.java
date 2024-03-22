@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nailsbyliz.reservation.domain.AppUserEntity;
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.domain.NailServiceRepository;
 import com.nailsbyliz.reservation.dto.NailServiceAdminDTO;
@@ -26,6 +25,7 @@ import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.NailService;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/nailservices")
 public class NailServiceRestController {
 
@@ -40,24 +40,23 @@ public class NailServiceRestController {
 
     // To show all available services
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllNailServices(Authentication authentication) {
-        Iterable<NailServiceEntity> services = nailRepo.findAll();
-        // Initiate the response variable
-        List<?> response;
-        // Logic to determine if the user is an admin based on authentication
-        try {
-            AppUserEntity user = authService.getCurrentUser();
 
-            if (user.getRole().equalsIgnoreCase(("ADMIN"))) {
-                response = mapToAdminDTOs(services);
-            } else {
-                response = mapToCustomerDTOs(services);
-            }
-        } catch (Exception e) {
+        boolean isAdmin = authService.isAdmin();
+
+        Iterable<NailServiceEntity> services = nailRepo.findAll();
+
+        List<?> response;
+
+        if (isAdmin) {
+            response = mapToAdminDTOs(services);
+        } else {
             response = mapToCustomerDTOs(services);
         }
 
         return ResponseEntity.ok(response);
+
     }
 
     private List<NailServiceAdminDTO> mapToAdminDTOs(Iterable<NailServiceEntity> services) {
@@ -105,7 +104,6 @@ public class NailServiceRestController {
 
     // Create a new type of service
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NailServiceEntity> newNailSerEntity(@RequestBody NailServiceEntity newService) {
         NailServiceEntity createdNailServiceEntity = nailService.saveNailServiceEntity(newService);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNailServiceEntity);
@@ -113,7 +111,6 @@ public class NailServiceRestController {
 
     // Edit existing services
     @PutMapping("/{serviceId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NailServiceEntity> updateNailServicEntity(@PathVariable Long serviceId,
             @RequestBody NailServiceEntity updatedNailService) {
         NailServiceEntity result = nailService.updateNailServiceEntity(serviceId, updatedNailService);
@@ -126,7 +123,6 @@ public class NailServiceRestController {
 
     // Delete an unvanted service
     @DeleteMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteNailService(@PathVariable Long serviceId) {
         boolean deleted = nailService.deleteNailService(serviceId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();

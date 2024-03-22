@@ -61,7 +61,7 @@ public class ReservationServiceApplication {
 
 			LocalTime openingHour = LocalTime.of(11, 0);
 			LocalTime closingHour = LocalTime.of(18, 0);
-			ReservationSettings rSettings = new ReservationSettings(openingHour, closingHour);
+			ReservationSettings rSettings = new ReservationSettings("OpeningHours", openingHour, closingHour, true);
 			rSettingsRepository.save(rSettings);
 
 			LocalDateTime firstAppointment = LocalDateTime.of(2024, 3, 21, 11, 0);
