@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.AppUserEntity;
-import com.nailsbyliz.reservation.domain.AppUserRepository;
+import com.nailsbyliz.reservation.repositories.AppUserRepository;
 
 @Service
 public class AppUserServiceImpl implements AppUserService {

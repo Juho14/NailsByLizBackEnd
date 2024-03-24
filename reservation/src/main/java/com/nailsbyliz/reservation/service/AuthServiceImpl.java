@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.AppUserEntity;
-import com.nailsbyliz.reservation.domain.AppUserRepository;
+import com.nailsbyliz.reservation.repositories.AppUserRepository;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     public boolean isAdmin() {
         try {
             AppUserEntity user = getCurrentUser();
-            return user.getRole().equalsIgnoreCase("ADMIN");
+            return user.getRole().equalsIgnoreCase("ROLE_ADMIN");
         } catch (Exception e) {
             return false;
         }

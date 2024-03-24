@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.domain.ReservationSettings;
-import com.nailsbyliz.reservation.domain.ReservationSettingsRepository;
+import com.nailsbyliz.reservation.repositories.ReservationSettingsRepository;
 import com.nailsbyliz.reservation.service.ReservationSettingsService;
 
 @RestController
 @RequestMapping("/api/reservationsettings")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class ReservationSettingsRestController {
 
     @Autowired
@@ -32,7 +32,7 @@ public class ReservationSettingsRestController {
     ReservationSettingsService settingService;
 
     // READ all
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<Iterable<ReservationSettings>> getAllReservationSettings() {
         Iterable<ReservationSettings> reservationSettingsList = reservationSettingsRepository.findAll();
         return ResponseEntity.ok(reservationSettingsList);
@@ -90,6 +90,7 @@ public class ReservationSettingsRestController {
 
     // DELETE
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteReservationSettings(@PathVariable Long id) {
         if (!reservationSettingsRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

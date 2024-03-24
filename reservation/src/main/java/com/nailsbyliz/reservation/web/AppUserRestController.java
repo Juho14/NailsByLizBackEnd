@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.domain.AppUserEntity;
-import com.nailsbyliz.reservation.domain.AppUserRepository;
+import com.nailsbyliz.reservation.repositories.AppUserRepository;
 import com.nailsbyliz.reservation.service.AppUserService;
 import com.nailsbyliz.reservation.service.AuthService;
 
 @RestController
 @RequestMapping("/api/users")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AppUserRestController {
 
     @Autowired
@@ -33,7 +34,6 @@ public class AppUserRestController {
 
     // Get all users
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Iterable<AppUserEntity>> get() {
         Iterable<AppUserEntity> appUsers = userRepo.findAll();
         return ResponseEntity.ok(appUsers);
@@ -59,7 +59,6 @@ public class AppUserRestController {
 
     // Edit a user
     @PutMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AppUserEntity> updateAppUser(@PathVariable Long userId,
             @RequestBody AppUserEntity updatedAppUser) {
         AppUserEntity result = userService.updateUser(userId, updatedAppUser);
@@ -73,7 +72,6 @@ public class AppUserRestController {
 
     // Delete a user
     @DeleteMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAppUser(@PathVariable Long userId) {
         boolean deleted = userService.deleteUser(userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();

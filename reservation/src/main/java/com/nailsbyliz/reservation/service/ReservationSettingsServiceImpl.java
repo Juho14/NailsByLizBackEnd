@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.ReservationSettings;
-import com.nailsbyliz.reservation.domain.ReservationSettingsRepository;
+import com.nailsbyliz.reservation.repositories.ReservationSettingsRepository;
 
 @Service
 public class ReservationSettingsServiceImpl implements ReservationSettingsService {

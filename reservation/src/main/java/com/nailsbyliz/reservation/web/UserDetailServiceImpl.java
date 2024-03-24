@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.AppUserEntity;
-import com.nailsbyliz.reservation.domain.AppUserRepository;
+import com.nailsbyliz.reservation.repositories.AppUserRepository;
 
 @Service
 public class UserDetailServiceImpl implements UserDetailsService {

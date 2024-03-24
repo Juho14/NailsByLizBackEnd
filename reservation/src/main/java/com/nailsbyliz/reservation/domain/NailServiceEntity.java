@@ -1,16 +1,33 @@
 package com.nailsbyliz.reservation.domain;
 
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import java.util.ArrayList;
+import java.util.List;
 
-@DynamoDbBean
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class NailServiceEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
+
     private String type;
     private int duration;
     private double price;
     private boolean AdminService;
+
+    @OneToMany(mappedBy = "nailService")
+    @JsonIgnore
+    private List<ReservationEntity> reservations = new ArrayList<>();
 
     public NailServiceEntity() {
     }
@@ -22,7 +39,6 @@ public class NailServiceEntity {
         this.AdminService = AdminService;
     }
 
-    @DynamoDbPartitionKey
     public Long getId() {
         return this.id;
     }
@@ -61,6 +77,14 @@ public class NailServiceEntity {
 
     public void setAdminService(boolean AdminService) {
         this.AdminService = AdminService;
+    }
+
+    public List<ReservationEntity> getReservations() {
+        return this.reservations;
+    }
+
+    public void setReservations(List<ReservationEntity> reservations) {
+        this.reservations = reservations;
     }
 
     @Override

@@ -2,12 +2,18 @@ package com.nailsbyliz.reservation.domain;
 
 import java.time.LocalTime;
 
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-@DynamoDbBean
+@Entity
 public class ReservationSettings {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
     private String name;
     private LocalTime startTime;
@@ -24,7 +30,6 @@ public class ReservationSettings {
         this.isActive = isActive;
     }
 
-    @DynamoDbPartitionKey
     public Long getId() {
         return id;
     }

@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
-import com.nailsbyliz.reservation.domain.NailServiceRepository;
 import com.nailsbyliz.reservation.dto.NailServiceAdminDTO;
 import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
+import com.nailsbyliz.reservation.repositories.NailServiceRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.NailService;
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequestMapping("/api/nailservices")
 public class NailServiceRestController {
 

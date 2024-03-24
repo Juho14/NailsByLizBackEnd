@@ -2,14 +2,22 @@ package com.nailsbyliz.reservation.domain;
 
 import java.time.LocalDateTime;
 
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbIgnore;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
-@DynamoDbBean
+@Entity
 public class ReservationEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
+
     private String fName;
     private String lName;
     private String email;
@@ -17,21 +25,34 @@ public class ReservationEntity {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
+    @ManyToOne
+    @JoinColumn(name = "nailservice_id")
     private NailServiceEntity nailService;
 
     private String status;
 
-    @DynamoDbPartitionKey
-    public Long getId() {
-        return id;
+    public ReservationEntity() {
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public ReservationEntity(String fName, String lName, String email, String phone, LocalDateTime startTime,
+            LocalDateTime endTime,
+            NailServiceEntity nailService, String status) {
+        this.fName = fName;
+        this.lName = lName;
+        this.email = email;
+        this.phone = phone;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.nailService = nailService;
+        this.status = status;
+    }
+
+    public Long getId() {
+        return this.id;
     }
 
     public String getFName() {
-        return fName;
+        return this.fName;
     }
 
     public void setFName(String fName) {
@@ -39,7 +60,7 @@ public class ReservationEntity {
     }
 
     public String getLName() {
-        return lName;
+        return this.lName;
     }
 
     public void setLName(String lName) {
@@ -47,7 +68,7 @@ public class ReservationEntity {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -55,7 +76,7 @@ public class ReservationEntity {
     }
 
     public String getPhone() {
-        return phone;
+        return this.phone;
     }
 
     public void setPhone(String phone) {
@@ -63,7 +84,7 @@ public class ReservationEntity {
     }
 
     public LocalDateTime getStartTime() {
-        return startTime;
+        return this.startTime;
     }
 
     public void setStartTime(LocalDateTime startTime) {
@@ -71,16 +92,15 @@ public class ReservationEntity {
     }
 
     public LocalDateTime getEndTime() {
-        return endTime;
+        return this.endTime;
     }
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 
-    @DynamoDbIgnore
     public NailServiceEntity getNailService() {
-        return nailService;
+        return this.nailService;
     }
 
     public void setNailService(NailServiceEntity nailService) {
@@ -88,7 +108,7 @@ public class ReservationEntity {
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(String status) {
@@ -102,7 +122,6 @@ public class ReservationEntity {
                 ", fName='" + getFName() + "'" +
                 ", lName='" + getLName() + "'" +
                 ", email='" + getEmail() + "'" +
-                ", phone='" + getPhone() + "'" +
                 ", startTime='" + getStartTime() + "'" +
                 ", endTime='" + getEndTime() + "'" +
                 ", nailService='" + getNailService() + "'" +

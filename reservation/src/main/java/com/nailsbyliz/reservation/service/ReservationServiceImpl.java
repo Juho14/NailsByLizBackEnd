@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
-import com.nailsbyliz.reservation.domain.NailServiceRepository;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
-import com.nailsbyliz.reservation.domain.ReservationRepository;
+import com.nailsbyliz.reservation.repositories.NailServiceRepository;
+import com.nailsbyliz.reservation.repositories.ReservationRepository;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {

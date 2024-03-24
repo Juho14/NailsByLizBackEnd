@@ -11,13 +11,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import com.nailsbyliz.reservation.domain.AppUserEntity;
-import com.nailsbyliz.reservation.domain.AppUserRepository;
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
-import com.nailsbyliz.reservation.domain.NailServiceRepository;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
-import com.nailsbyliz.reservation.domain.ReservationRepository;
 import com.nailsbyliz.reservation.domain.ReservationSettings;
-import com.nailsbyliz.reservation.domain.ReservationSettingsRepository;
+import com.nailsbyliz.reservation.repositories.AppUserRepository;
+import com.nailsbyliz.reservation.repositories.NailServiceRepository;
+import com.nailsbyliz.reservation.repositories.ReservationRepository;
+import com.nailsbyliz.reservation.repositories.ReservationSettingsRepository;
 import com.nailsbyliz.reservation.service.AppUserService;
 import com.nailsbyliz.reservation.service.ReservationService;
 
@@ -40,9 +40,9 @@ public class ReservationServiceApplication {
 
 			AppUserEntity admin = new AppUserEntity("Liz", "Meowee", "Renate", "0450987654",
 					"liz.meowee@hotmail.com", "Testi",
-					"ADMIN");
+					"ROLE_ADMIN");
 			AppUserEntity dev = new AppUserEntity("Test", "Dev", "TestDev", "0451234567", "TestDev@gmail.com", "Test",
-					"ADMIN");
+					"ROLE_ADMIN");
 
 			AppUserEntity testCustomer = new AppUserEntity("Customer", "Caleb", "Customer", "12345678790",
 					"Customer@gmail.com", "Test",

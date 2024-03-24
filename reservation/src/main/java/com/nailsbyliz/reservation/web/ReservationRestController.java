@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.domain.ReservationEntity;
-import com.nailsbyliz.reservation.domain.ReservationRepository;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationUserDTO;
+import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
 
