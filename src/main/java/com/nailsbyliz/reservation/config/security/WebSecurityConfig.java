@@ -5,7 +5,9 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,41 +34,37 @@ public class WebSecurityConfig {
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(antMatcher("/css/**")).permitAll()
                         .requestMatchers(antMatcher("/login")).permitAll()
-                        .requestMatchers(antMatcher("/h2-console/**")).permitAll()
-                        .requestMatchers(antMatcher("/api/**")).permitAll()
                         .requestMatchers(antMatcher(HttpMethod.GET, "/api/reservations")).permitAll()
                         .requestMatchers(antMatcher(HttpMethod.POST, "/api/reservations")).permitAll()
                         .requestMatchers(antMatcher("/api/reservationsettings/active")).permitAll()
-                        /*
-                         * .requestMatchers(antMatcher(HttpMethod.GET,
-                         * "/api/reservations/**")).permitAll()
-                         * .requestMatchers(antMatcher(HttpMethod.POST,
-                         * "/api/reservations/**")).permitAll()
-                         * .requestMatchers(antMatcher(HttpMethod.PUT,
-                         * "/api/reservations/**")).permitAll()
-                         * .requestMatchers(antMatcher(HttpMethod.DELETE,
-                         * "/api/reservations/**")).permitAll()
-                         */
+                        .requestMatchers(antMatcher("/api/login")).permitAll()
                         .anyRequest().authenticated())
-                .headers(headers -> headers
-                        .frameOptions(frameoptions -> frameoptions.disable()) // for h2 console
-                )
+                .headers(headers -> headers.frameOptions(frameoptions -> frameoptions.disable()))
                 .formLogin(formlogin -> formlogin
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl("/api/reservations", true)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login")
                         .permitAll())
-
                 .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
 
-    public void configureGlobal(AuthenticationManagerBuilder auth, PasswordEncoder passwordEncoder) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

@@ -22,7 +22,7 @@ import com.nailsbyliz.reservation.service.ReservationSettingsService;
 
 @RestController
 @RequestMapping("/api/reservationsettings")
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+// @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class ReservationSettingsRestController {
 
     @Autowired
@@ -90,7 +90,6 @@ public class ReservationSettingsRestController {
 
     // DELETE
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteReservationSettings(@PathVariable Long id) {
         if (!reservationSettingsRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

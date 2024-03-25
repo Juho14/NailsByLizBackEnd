@@ -25,7 +25,7 @@ import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.NailService;
 
 @RestController
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+// @PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequestMapping("/api/nailservices")
 public class NailServiceRestController {
 
@@ -49,12 +49,14 @@ public class NailServiceRestController {
 
         List<?> response;
 
-        if (isAdmin) {
-            response = mapToAdminDTOs(services);
-        } else {
-            response = mapToCustomerDTOs(services);
-        }
-
+        /*
+         * if (isAdmin) {
+         * response = mapToAdminDTOs(services);
+         * } else {
+         * response = mapToCustomerDTOs(services);
+         * }
+         */
+        response = mapToAdminDTOs(services);
         return ResponseEntity.ok(response);
 
     }

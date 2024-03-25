@@ -25,7 +25,7 @@ import com.nailsbyliz.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/api/reservations")
-@PreAuthorize("hasRole('ADMIN')")
+// @PreAuthorize("hasRole('ADMIN')")
 public class ReservationRestController {
 
     @Autowired
@@ -46,11 +46,14 @@ public class ReservationRestController {
         Iterable<ReservationEntity> reservations = reservationRepository.findAll();
         List<?> response;
 
-        if (isAdmin) {
-            response = mapToAdminDTOs(reservations);
-        } else {
-            response = mapToUserDTOs(reservations);
-        }
+        /*
+         * if (isAdmin) {
+         * response = mapToAdminDTOs(reservations);
+         * } else {
+         * response = mapToUserDTOs(reservations);
+         * }
+         */
+        response = mapToAdminDTOs(reservations);
 
         return ResponseEntity.ok(response);
     }

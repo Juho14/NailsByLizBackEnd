@@ -1,4 +1,4 @@
-package com.nailsbyliz.reservation.config.Cors;
+package com.nailsbyliz.reservation.config.cors;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
