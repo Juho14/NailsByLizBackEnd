@@ -4,7 +4,6 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -34,12 +33,17 @@ public class WebSecurityConfig {
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(antMatcher("/login")).permitAll()
-                        .requestMatchers(antMatcher(HttpMethod.GET, "/api/reservations")).permitAll()
-                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/reservations")).permitAll()
-                        .requestMatchers(antMatcher("/api/reservationsettings/active")).permitAll()
-                        .requestMatchers(antMatcher("/api/login")).permitAll()
+                        /*
+                         * .requestMatchers(antMatcher("/login")).permitAll()
+                         * .requestMatchers(antMatcher(HttpMethod.GET, "/api/reservations")).permitAll()
+                         * .requestMatchers(antMatcher(HttpMethod.POST,
+                         * "/api/reservations")).permitAll()
+                         * .requestMatchers(antMatcher("/api/reservationsettings/active")).permitAll()
+                         * .requestMatchers(antMatcher("/api/login")).permitAll()
+                         */
+                        .requestMatchers(antMatcher("/**")).permitAll()
                         .anyRequest().authenticated())
+
                 .headers(headers -> headers.frameOptions(frameoptions -> frameoptions.disable()))
                 .formLogin(formlogin -> formlogin
                         .loginPage("/login")
