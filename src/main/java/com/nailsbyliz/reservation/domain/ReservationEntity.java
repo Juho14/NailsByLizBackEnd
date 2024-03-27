@@ -22,6 +22,9 @@ public class ReservationEntity {
     private String lName;
     private String email;
     private String phone;
+    private String address;
+    private String city;
+    private String postalcode;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -34,13 +37,16 @@ public class ReservationEntity {
     public ReservationEntity() {
     }
 
-    public ReservationEntity(String fName, String lName, String email, String phone, LocalDateTime startTime,
-            LocalDateTime endTime,
-            NailServiceEntity nailService, String status) {
+    public ReservationEntity(String fName, String lName, String email, String phone, String address, String city,
+            String postalcode, LocalDateTime startTime, LocalDateTime endTime, NailServiceEntity nailService,
+            String status) {
         this.fName = fName;
         this.lName = lName;
         this.email = email;
         this.phone = phone;
+        this.address = address;
+        this.city = city;
+        this.postalcode = postalcode;
         this.startTime = startTime;
         this.endTime = endTime;
         this.nailService = nailService;
@@ -115,6 +121,34 @@ public class ReservationEntity {
         this.status = status;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return this.city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPostalcode() {
+        return this.postalcode;
+    }
+
+    public void setPostalcode(String postalcode) {
+        this.postalcode = postalcode;
+    }
+
     @Override
     public String toString() {
         return "{" +
@@ -122,6 +156,10 @@ public class ReservationEntity {
                 ", fName='" + getFName() + "'" +
                 ", lName='" + getLName() + "'" +
                 ", email='" + getEmail() + "'" +
+                ", phone='" + getPhone() + "'" +
+                ", address='" + getAddress() + "'" +
+                ", city='" + getCity() + "'" +
+                ", postalcode='" + getPostalcode() + "'" +
                 ", startTime='" + getStartTime() + "'" +
                 ", endTime='" + getEndTime() + "'" +
                 ", nailService='" + getNailService() + "'" +

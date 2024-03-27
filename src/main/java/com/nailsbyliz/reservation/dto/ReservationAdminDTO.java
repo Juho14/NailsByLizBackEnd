@@ -10,6 +10,9 @@ public class ReservationAdminDTO {
     private String lName;
     private String email;
     private String phone;
+    private String address;
+    private String city;
+    private String postalcode;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private NailServiceEntity nailService;
@@ -53,6 +56,30 @@ public class ReservationAdminDTO {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return this.city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPostalcode() {
+        return this.postalcode;
+    }
+
+    public void setPostalcode(String postalcode) {
+        this.postalcode = postalcode;
     }
 
     public LocalDateTime getStartTime() {

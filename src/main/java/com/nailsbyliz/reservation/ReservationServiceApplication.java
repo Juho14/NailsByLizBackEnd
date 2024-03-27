@@ -65,6 +65,9 @@ public class ReservationServiceApplication {
 	 * reservation1.setLName("Doe");
 	 * reservation1.setEmail("john.doe@example.com");
 	 * reservation1.setPhone("1239874658");
+	 * reservation1.setAddress("Mikonkatu 2 A 34");
+	 * reservation1.setCity("Helsinki");
+	 * reservation1.setPostalcode("00100");
 	 * reservation1.setStartTime(firstAppointment);
 	 * reservation1.setNailService(gelPolish);
 	 * reservation1.setStatus("OK");
@@ -74,6 +77,9 @@ public class ReservationServiceApplication {
 	 * reservation2.setLName("Smith");
 	 * reservation2.setEmail("jane.smith@example.com");
 	 * reservation2.setPhone("9348877193");
+	 * reservation2.setAddress("Tiistiläntie 7 D 85");
+	 * reservation2.setCity("Espoo");
+	 * reservation2.setPostalcode("02210");
 	 * reservation2.setStartTime(secondAppointment);
 	 * reservation2.setNailService(gelMaintenance);
 	 * reservation2.setStatus("OK");
@@ -83,6 +89,9 @@ public class ReservationServiceApplication {
 	 * reservation3.setLName("Johnson");
 	 * reservation3.setEmail("alice.johnson@example.com");
 	 * reservation3.setPhone("9812983722");
+	 * reservation3.setAddress("Ratapihantie 2 C 42");
+	 * reservation3.setCity("Vantaa");
+	 * reservation3.setPostalcode("01300");
 	 * reservation3.setStartTime(thirdAppointment);
 	 * reservation3.setNailService(gelRemoval);
 	 * reservation3.setStatus("OK");
