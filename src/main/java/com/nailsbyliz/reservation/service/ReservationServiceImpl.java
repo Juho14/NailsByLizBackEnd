@@ -68,6 +68,9 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setFName(updatedReservation.getFName());
             existingReservation.setLName(updatedReservation.getLName());
             existingReservation.setEmail(updatedReservation.getEmail());
+            existingReservation.setAddress(updatedReservation.getAddress());
+            existingReservation.setCity(updatedReservation.getCity());
+            existingReservation.setPostalcode(updatedReservation.getPostalcode());
             existingReservation.setStartTime(updatedReservation.getStartTime());
             existingReservation.setStatus(updatedReservation.getStatus());
             return saveReservation(existingReservation);
