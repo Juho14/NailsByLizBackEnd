@@ -1,6 +1,7 @@
 package com.nailsbyliz.reservation.web;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,14 @@ public class ReservationRestController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // End point to fetch reservations of a given date
+    @GetMapping("/byDay/{day}")
+    public ResponseEntity<?> getReservationsByDay(@PathVariable("day") Date day) {
+        List<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
+        List<ReservationAdminDTO> response = mapToAdminDTOs(reservations);
+        return ResponseEntity.ok(response);
     }
 
     // Create a new reservation
