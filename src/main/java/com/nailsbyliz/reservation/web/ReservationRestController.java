@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -106,8 +107,9 @@ public class ReservationRestController {
     }
 
     // End point to fetch reservations of a given date
-    @GetMapping("/byDay/{day}")
-    public ResponseEntity<?> getReservationsByDay(@PathVariable("day") Date day) {
+    @GetMapping("/byday/{day}")
+    public ResponseEntity<?> getReservationsByDay(
+            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
         List<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
         List<ReservationAdminDTO> response = mapToAdminDTOs(reservations);
         return ResponseEntity.ok(response);
