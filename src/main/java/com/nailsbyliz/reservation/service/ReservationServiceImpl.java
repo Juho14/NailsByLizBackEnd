@@ -1,5 +1,6 @@
 package com.nailsbyliz.reservation.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -96,13 +97,18 @@ public class ReservationServiceImpl implements ReservationService {
         List<ReservationEntity> reservationsOfDay = new ArrayList<>();
         Iterable<ReservationEntity> existingReservations = reservationRepository.findAll();
 
+        LocalDate targetDate = day.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
         for (ReservationEntity r : existingReservations) {
-            Date dateOfExisting = Date.from(r.getStartTime().atZone(ZoneId.systemDefault()).toInstant());
-            if (dateOfExisting.compareTo(day) == 0) {
+            LocalDateTime startTime = r.getStartTime();
+            LocalDate reservationDate = startTime.toLocalDate();
+
+            if (reservationDate.equals(targetDate)) {
                 reservationsOfDay.add(r);
             }
         }
 
         return reservationsOfDay;
     }
+
 }
