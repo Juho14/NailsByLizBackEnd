@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS reservation_entity (
     address VARCHAR(50),
     city VARCHAR(30),
     postal_code VARCHAR(5),
+    price DECIMAL(10, 2),
     start_time TIMESTAMP,
     end_time TIMESTAMP,
     nail_service_id BIGINT,

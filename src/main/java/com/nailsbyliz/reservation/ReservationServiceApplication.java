@@ -37,11 +37,12 @@ public class ReservationServiceApplication {
 	 * appUserService.createUser(admin);
 	 * appUserService.createUser(dev);
 	 * appUserService.createUser(testCustomer);
-	 * NailServiceEntity gelPolish = new NailServiceEntity("GelPolish", 180, 35,
+	 * NailServiceEntity gelPolish = new NailServiceEntity("Geelilakkaus", 180, 35,
 	 * false);
-	 * NailServiceEntity gelMaintenance = new NailServiceEntity("GelMaintenance",
+	 * NailServiceEntity gelMaintenance = new NailServiceEntity("Geelihuolto",
 	 * 360, 80, false);
-	 * NailServiceEntity gelRemoval = new NailServiceEntity("GelRemoval", 120, 20,
+	 * NailServiceEntity gelRemoval = new NailServiceEntity("Geelilakan poisto",
+	 * 120, 20,
 	 * false);
 	 * NailServiceEntity dayOff = new NailServiceEntity("DayOff", 420, 0, true);
 	 * nailRepo.save(gelPolish);
@@ -70,6 +71,7 @@ public class ReservationServiceApplication {
 	 * reservation1.setPostalcode("00100");
 	 * reservation1.setStartTime(firstAppointment);
 	 * reservation1.setNailService(gelPolish);
+	 * reservation1.setPrice(gelPolish.getPrice());
 	 * reservation1.setStatus("OK");
 	 * 
 	 * ReservationEntity reservation2 = new ReservationEntity();
@@ -82,6 +84,7 @@ public class ReservationServiceApplication {
 	 * reservation2.setPostalcode("02210");
 	 * reservation2.setStartTime(secondAppointment);
 	 * reservation2.setNailService(gelMaintenance);
+	 * reservation2.setPrice(gelMaintenance.getPrice());
 	 * reservation2.setStatus("OK");
 	 * 
 	 * ReservationEntity reservation3 = new ReservationEntity();
@@ -94,6 +97,7 @@ public class ReservationServiceApplication {
 	 * reservation3.setPostalcode("01300");
 	 * reservation3.setStartTime(thirdAppointment);
 	 * reservation3.setNailService(gelRemoval);
+	 * reservation3.setPrice(gelRemoval.getPrice());
 	 * reservation3.setStatus("OK");
 	 * 
 	 * // Save reservations
@@ -122,5 +126,4 @@ public class ReservationServiceApplication {
 	 * };
 	 * }
 	 */
-
 }
