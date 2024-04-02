@@ -25,6 +25,7 @@ public class ReservationEntity {
     private String address;
     private String city;
     private String postalcode;
+    private double price;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -38,7 +39,8 @@ public class ReservationEntity {
     }
 
     public ReservationEntity(String fName, String lName, String email, String phone, String address, String city,
-            String postalcode, LocalDateTime startTime, LocalDateTime endTime, NailServiceEntity nailService,
+            String postalcode, double price, LocalDateTime startTime, LocalDateTime endTime,
+            NailServiceEntity nailService,
             String status) {
         this.fName = fName;
         this.lName = lName;
@@ -47,6 +49,7 @@ public class ReservationEntity {
         this.address = address;
         this.city = city;
         this.postalcode = postalcode;
+        this.price = price;
         this.startTime = startTime;
         this.endTime = endTime;
         this.nailService = nailService;
@@ -87,6 +90,14 @@ public class ReservationEntity {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public double getPrice() {
+        return this.price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public LocalDateTime getStartTime() {

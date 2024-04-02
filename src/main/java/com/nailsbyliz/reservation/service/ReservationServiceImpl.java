@@ -38,7 +38,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
 
         reservation.setNailService(nailService);
-
+        reservation.setPrice(nailService.getPrice());
         List<ReservationEntity> reservationsOfDay = getReservationsByDay(
                 Date.from(reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
         if (!reservationsOfDay.isEmpty()) {
@@ -72,6 +72,7 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setAddress(updatedReservation.getAddress());
             existingReservation.setCity(updatedReservation.getCity());
             existingReservation.setPostalcode(updatedReservation.getPostalcode());
+            existingReservation.setPrice(updatedReservation.getPrice());
             existingReservation.setStartTime(updatedReservation.getStartTime());
             existingReservation.setStatus(updatedReservation.getStatus());
             return saveReservation(existingReservation);
