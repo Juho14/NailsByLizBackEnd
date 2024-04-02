@@ -13,6 +13,7 @@ public class ReservationAdminDTO {
     private String address;
     private String city;
     private String postalcode;
+    private double price;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private NailServiceEntity nailService;
@@ -80,6 +81,14 @@ public class ReservationAdminDTO {
 
     public void setPostalcode(String postalcode) {
         this.postalcode = postalcode;
+    }
+
+    public double getPrice() {
+        return this.price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public LocalDateTime getStartTime() {

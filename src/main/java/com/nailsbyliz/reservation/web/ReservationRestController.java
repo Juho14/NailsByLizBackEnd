@@ -85,6 +85,7 @@ public class ReservationRestController {
             dto.setAddress(reservation.getAddress());
             dto.setCity(reservation.getCity());
             dto.setPostalcode(reservation.getPostalcode());
+            dto.setPrice(reservation.getPrice());
             dto.setStartTime(reservation.getStartTime());
             dto.setEndTime(reservation.getEndTime());
             dto.setNailService(reservation.getNailService());
