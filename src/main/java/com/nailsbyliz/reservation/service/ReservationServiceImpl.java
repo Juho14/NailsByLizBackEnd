@@ -86,6 +86,7 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setPostalcode(updatedReservation.getPostalcode());
             existingReservation.setPrice(updatedReservation.getPrice());
             existingReservation.setStartTime(updatedReservation.getStartTime());
+            existingReservation.setNailService(updatedReservation.getNailService());
             existingReservation.setStatus(updatedReservation.getStatus());
             return saveReservation(existingReservation);
         } else {
