@@ -34,24 +34,30 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setEndTime(endDateTime);
 
         // Value to track the existing id when editing a reservation
-        Long existingId = null;
+        Long existingId = reservation.getId();
 
-        if (reservation.getId() != null) {
-            existingId = reservation.getId();
+        if (existingId != null) { // Check if it's an existing reservation
+            // Retrieve the existing reservation from the database
+            Optional<ReservationEntity> optionalExistingReservation = reservationRepository.findById(existingId);
+            if (optionalExistingReservation.isPresent()) {
+                ReservationEntity existingReservation = optionalExistingReservation.get();
+                // Keep the existing price if it's an existing reservation
+                reservation.setPrice(existingReservation.getPrice());
+            }
+        } else { // It's a new reservation
+            Long serviceId = reservation.getNailService().getId();
+            NailServiceEntity nailService = nailRepo.findById(serviceId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
+            reservation.setNailService(nailService);
+            reservation.setPrice(nailService.getPrice());
         }
 
-        Long serviceId = reservation.getNailService().getId();
-        NailServiceEntity nailService = nailRepo.findById(serviceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
-
-        reservation.setNailService(nailService);
-        reservation.setPrice(nailService.getPrice());
+        // Check for overlaps
         List<ReservationEntity> reservationsOfDay = getReservationsByDay(
                 Date.from(reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
 
         for (ReservationEntity r : reservationsOfDay) {
-
-            // Ignore the overalp with its own timeslot when editing a reservation
+            // Ignore the overlap with its own timeslot when editing a reservation
             if (existingId != null && r.getId().equals(existingId)) {
                 continue;
             }
@@ -64,6 +70,7 @@ public class ReservationServiceImpl implements ReservationService {
                 throw new IllegalArgumentException("The new reservation overlaps with an existing reservation.");
             }
         }
+
         return reservationRepository.save(reservation);
     }
 
