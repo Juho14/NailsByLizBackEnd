@@ -33,6 +33,13 @@ public class ReservationServiceImpl implements ReservationService {
         LocalDateTime endDateTime = startTime.plusMinutes(durationMinutes);
         reservation.setEndTime(endDateTime);
 
+        // Value to track the existing id when editing a reservation
+        Long existingId = null;
+
+        if (reservation.getId() != null) {
+            existingId = reservation.getId();
+        }
+
         Long serviceId = reservation.getNailService().getId();
         NailServiceEntity nailService = nailRepo.findById(serviceId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
@@ -41,17 +48,22 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setPrice(nailService.getPrice());
         List<ReservationEntity> reservationsOfDay = getReservationsByDay(
                 Date.from(reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
-        if (!reservationsOfDay.isEmpty()) {
-            for (ReservationEntity r : reservationsOfDay) {
-                if (startTime.isAfter(r.getEndTime()) || endDateTime.isBefore(r.getStartTime())) {
-                    // Checks if there are overlaps. If not, the entity will be saved.
-                    continue;
-                } else {
-                    throw new IllegalArgumentException("The new reservation overlaps with an existing reservation.");
-                }
+
+        for (ReservationEntity r : reservationsOfDay) {
+
+            // Ignore the overalp with its own timeslot when editing a reservation
+            if (existingId != null && r.getId().equals(existingId)) {
+                continue;
+            }
+            LocalDateTime existingStartTime = r.getStartTime();
+            LocalDateTime existingEndTime = r.getEndTime();
+
+            // Check if the new reservation overlaps with the existing reservation
+            if (reservation.getStartTime().isBefore(existingEndTime) &&
+                    existingStartTime.isBefore(reservation.getEndTime())) {
+                throw new IllegalArgumentException("The new reservation overlaps with an existing reservation.");
             }
         }
-
         return reservationRepository.save(reservation);
     }
 
