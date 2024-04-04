@@ -134,7 +134,7 @@ public class ReservationRestController {
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId) {
         boolean deleted = reservationService.deleteReservation(reservationId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
