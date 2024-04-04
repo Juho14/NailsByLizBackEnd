@@ -123,8 +123,8 @@ public class NailServiceRestController {
         }
     }
 
-    // Delete an unvanted service
-    @DeleteMapping
+    // Delete an unwanted service
+    @DeleteMapping("/{serviceId}")
     public ResponseEntity<Void> deleteNailService(@PathVariable Long serviceId) {
         boolean deleted = nailService.deleteNailService(serviceId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
