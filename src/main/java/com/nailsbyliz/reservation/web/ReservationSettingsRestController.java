@@ -69,7 +69,7 @@ public class ReservationSettingsRestController {
     }
 
     // CREATE
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<ReservationSettings> createReservationSettings(
             @RequestBody ReservationSettings reservationSettings) {
         ReservationSettings savedReservationSettings = reservationSettingsRepository.save(reservationSettings);
