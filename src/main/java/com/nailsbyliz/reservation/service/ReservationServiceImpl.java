@@ -61,6 +61,9 @@ public class ReservationServiceImpl implements ReservationService {
             if (existingId != null && r.getId().equals(existingId)) {
                 continue;
             }
+            if (!r.getStatus().equalsIgnoreCase("OK")) {
+                continue;
+            }
             LocalDateTime existingStartTime = r.getStartTime();
             LocalDateTime existingEndTime = r.getEndTime();
 
