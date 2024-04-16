@@ -1,5 +1,6 @@
 package com.nailsbyliz.reservation.service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -133,6 +134,24 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         return reservationsOfDay;
+    }
+
+    @Override
+    public List<ReservationEntity> getReservationsForWeek(Date date) {
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate startOfWeek = localDate.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+
+        // Retrieve reservations for the entire week
+        List<ReservationEntity> reservationsForWeek = new ArrayList<>();
+        for (LocalDate currentDate = startOfWeek; currentDate
+                .isBefore(endOfWeek.plusDays(1)); currentDate = currentDate.plusDays(1)) {
+            List<ReservationEntity> reservationsOfDay = getReservationsByDay(
+                    Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            reservationsForWeek.addAll(reservationsOfDay);
+        }
+
+        return reservationsForWeek;
     }
 
 }

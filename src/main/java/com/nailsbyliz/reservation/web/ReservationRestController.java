@@ -116,6 +116,15 @@ public class ReservationRestController {
         return ResponseEntity.ok(response);
     }
 
+    // End point to fetch all reservations of a week. Used for rendering timeslots
+    @GetMapping("/byweek/{day}")
+    public ResponseEntity<?> getReservationsByWeek(
+            @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
+        List<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
+        List<ReservationAdminDTO> response = mapToAdminDTOs(reservations);
+        return ResponseEntity.ok(response);
+    }
+
     // Create a new reservation
     @PostMapping
     public ResponseEntity<ReservationEntity> newReservation(@RequestBody ReservationEntity reservation) {

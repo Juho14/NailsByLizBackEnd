@@ -15,4 +15,6 @@ public interface ReservationService {
     boolean deleteReservation(Long reservationId);
 
     List<ReservationEntity> getReservationsByDay(Date date);
+
+    List<ReservationEntity> getReservationsForWeek(Date date);
 }
