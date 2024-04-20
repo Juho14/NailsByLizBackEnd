@@ -43,10 +43,12 @@ public class ReservationServiceImpl implements ReservationService {
         if (existingId != null) {
             Optional<ReservationEntity> optionalExistingReservation = reservationRepository.findById(existingId);
             if (!optionalExistingReservation.isPresent()) {
-                // New reservations are always set to the active service price
-                // When editing a reservation, price can be set manually.
+                // If the ID cant get the reservation, set the current price
                 reservation.setPrice(nailService.getPrice());
             }
+        } else {
+            // New reservations are always set to the active service price
+            reservation.setPrice(nailService.getPrice());
         }
 
         // Check for overlaps
