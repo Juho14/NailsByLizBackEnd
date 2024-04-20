@@ -40,11 +40,13 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setEndTime(startTime.plusMinutes(nailService.getDuration()));
 
         // Retrieve the existing reservation from the database
-        Optional<ReservationEntity> optionalExistingReservation = reservationRepository.findById(existingId);
-        if (!optionalExistingReservation.isPresent()) {
-            // New reservations are always set to the active service price
-            // When editing a reservation, price can be set manually.
-            reservation.setPrice(nailService.getPrice());
+        if (existingId != null) {
+            Optional<ReservationEntity> optionalExistingReservation = reservationRepository.findById(existingId);
+            if (!optionalExistingReservation.isPresent()) {
+                // New reservations are always set to the active service price
+                // When editing a reservation, price can be set manually.
+                reservation.setPrice(nailService.getPrice());
+            }
         }
 
         // Check for overlaps
