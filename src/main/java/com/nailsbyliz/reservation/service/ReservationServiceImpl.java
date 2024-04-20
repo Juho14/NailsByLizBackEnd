@@ -30,29 +30,23 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationEntity saveReservation(ReservationEntity reservation) {
         LocalDateTime startTime = reservation.getStartTime();
-        int durationMinutes = reservation.getNailService().getDuration();
-        LocalDateTime endDateTime = startTime.plusMinutes(durationMinutes);
-        reservation.setEndTime(endDateTime);
-
         // Value to track the existing id when editing a reservation
         Long existingId = reservation.getId();
 
+        Long serviceId = reservation.getNailService().getId();
+        NailServiceEntity nailService = nailRepo.findById(serviceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
+        reservation.setNailService(nailService);
+        reservation.setEndTime(startTime.plusMinutes(nailService.getDuration()));
         if (existingId != null) { // Check if it's an existing reservation
             // Retrieve the existing reservation from the database
             Optional<ReservationEntity> optionalExistingReservation = reservationRepository.findById(existingId);
-            if (optionalExistingReservation.isPresent()) {
-                ReservationEntity existingReservation = optionalExistingReservation.get();
-                // Keep the existing price if it's an existing reservation
-                reservation.setPrice(existingReservation.getPrice());
+            if (!optionalExistingReservation.isPresent()) {
+                // New reservations are always set to the active service price
+                // When editing a reservation, price can be set manually.
+                reservation.setPrice(nailService.getPrice());
             }
-        } else { // It's a new reservation
-            Long serviceId = reservation.getNailService().getId();
-            NailServiceEntity nailService = nailRepo.findById(serviceId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
-            reservation.setNailService(nailService);
-            reservation.setPrice(nailService.getPrice());
         }
-
         // Check for overlaps
         List<ReservationEntity> reservationsOfDay = getReservationsByDay(
                 Date.from(reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
