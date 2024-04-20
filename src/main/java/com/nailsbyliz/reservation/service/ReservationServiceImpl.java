@@ -38,15 +38,15 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
         reservation.setNailService(nailService);
         reservation.setEndTime(startTime.plusMinutes(nailService.getDuration()));
-        if (existingId != null) { // Check if it's an existing reservation
-            // Retrieve the existing reservation from the database
-            Optional<ReservationEntity> optionalExistingReservation = reservationRepository.findById(existingId);
-            if (!optionalExistingReservation.isPresent()) {
-                // New reservations are always set to the active service price
-                // When editing a reservation, price can be set manually.
-                reservation.setPrice(nailService.getPrice());
-            }
+
+        // Retrieve the existing reservation from the database
+        Optional<ReservationEntity> optionalExistingReservation = reservationRepository.findById(existingId);
+        if (!optionalExistingReservation.isPresent()) {
+            // New reservations are always set to the active service price
+            // When editing a reservation, price can be set manually.
+            reservation.setPrice(nailService.getPrice());
         }
+
         // Check for overlaps
         List<ReservationEntity> reservationsOfDay = getReservationsByDay(
                 Date.from(reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
