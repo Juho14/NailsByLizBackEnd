@@ -56,11 +56,10 @@ public class ReservationServiceImpl implements ReservationService {
         LocalTime settingStartTime = activeSettings.getStartTime();
         LocalTime settingEndTime = activeSettings.getEndTime();
 
-        // Validate reservation time against active settings. Reservations can begin at
-        // the hour so compare 11 am to 10:59 am. and 18:00 to 18:01.
-        if (!startTime.toLocalTime().isAfter(settingStartTime.minusMinutes(1)) ||
-                !reservation.getEndTime().toLocalTime().isBefore(settingEndTime.plusMinutes(1))) {
-            throw new IllegalArgumentException("Reservation time is outside active reservation settings.");
+        // Validate that reservation's startTime is within allowed settings time range.
+        if (startTime.toLocalTime().isBefore(settingStartTime.minusMinutes(1)) ||
+                startTime.toLocalTime().isAfter(settingEndTime.plusMinutes(1))) {
+            throw new IllegalArgumentException("Reservation start time is outside active reservation settings.");
         }
 
         // Retrieve the existing reservation from the database
