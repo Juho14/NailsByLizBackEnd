@@ -3,6 +3,7 @@ package com.nailsbyliz.reservation.service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
+import com.nailsbyliz.reservation.domain.ReservationSettings;
 import com.nailsbyliz.reservation.repositories.NailServiceRepository;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 
@@ -27,6 +29,9 @@ public class ReservationServiceImpl implements ReservationService {
     @Autowired
     NailServiceRepository nailRepo;
 
+    @Autowired
+    ReservationSettingsService reservationSettingsService;
+
     @Override
     public ReservationEntity saveReservation(ReservationEntity reservation) {
         LocalDateTime startTime = reservation.getStartTime();
@@ -38,6 +43,25 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
         reservation.setNailService(nailService);
         reservation.setEndTime(startTime.plusMinutes(nailService.getDuration()));
+
+        // Retrieve active reservation settings to secure that all reservations are
+        // within the open hours. Times are sent to the backend through the URL, so
+        // malicious requests are blocked.
+        ReservationSettings activeSettings = reservationSettingsService.findActiveReservation();
+        if (activeSettings == null) {
+            throw new IllegalStateException("No active reservation settings available.");
+        }
+
+        // Convert reservation times to system default zone to compare with settings
+        LocalTime settingStartTime = activeSettings.getStartTime();
+        LocalTime settingEndTime = activeSettings.getEndTime();
+
+        // Validate reservation time against active settings. Reservations can begin at
+        // the hour so compare 11 am to 10:59 am. and 18:00 to 18:01.
+        if (!startTime.toLocalTime().isAfter(settingStartTime.minusMinutes(1)) ||
+                !reservation.getEndTime().toLocalTime().isBefore(settingEndTime.plusMinutes(1))) {
+            throw new IllegalArgumentException("Reservation time is outside active reservation settings.");
+        }
 
         // Retrieve the existing reservation from the database
         if (existingId != null) {
