@@ -34,6 +34,7 @@ public class NailServiceImpl implements NailService {
             existingNailService.setType(updatedNailService.getType());
             existingNailService.setDuration(updatedNailService.getDuration());
             existingNailService.setPrice(updatedNailService.getPrice());
+            existingNailService.setAdminService(updatedNailService.getAdminService());
             return saveNailServiceEntity(existingNailService);
         } else {
             throw new NoSuchElementException("Nailservice not found with id: " + serviceId);
