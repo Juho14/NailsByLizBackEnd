@@ -1,5 +1,6 @@
 package com.nailsbyliz.reservation.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -7,13 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
+import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.repositories.NailServiceRepository;
+import com.nailsbyliz.reservation.repositories.ReservationRepository;
 
 @Service
 public class NailServiceImpl implements NailService {
 
     @Autowired
     NailServiceRepository nailRepo;
+
+    @Autowired
+    ReservationRepository reservationRepo;
 
     @Override
     public NailServiceEntity saveNailServiceEntity(NailServiceEntity nailServiceEntity) {
@@ -46,10 +52,23 @@ public class NailServiceImpl implements NailService {
         Optional<NailServiceEntity> optionalNailService = nailRepo.findById(serviceId);
         if (optionalNailService.isPresent()) {
             NailServiceEntity nailServiceEntity = optionalNailService.get();
+
+            List<ReservationEntity> reservationsUsingService = reservationRepo
+                    .findByNailService(nailServiceEntity);
+
+            // Set the service to null for each reservation
+            for (ReservationEntity reservation : reservationsUsingService) {
+                reservation.setNailService(null);
+
+                // Save the updated reservation
+                reservationRepo.save(reservation);
+            }
+
             nailRepo.delete(nailServiceEntity);
             return true;
         } else {
             return false;
         }
     }
+
 }
