@@ -17,6 +17,7 @@ public class ReservationAdminDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private NailServiceEntity nailService;
+    private Long customerId;
     private String status;
 
     public Long getId() {
@@ -121,6 +122,14 @@ public class ReservationAdminDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getCustomerId() {
+        return this.customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
 }

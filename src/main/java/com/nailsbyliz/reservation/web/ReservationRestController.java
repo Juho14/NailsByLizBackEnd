@@ -90,6 +90,7 @@ public class ReservationRestController {
             dto.setEndTime(reservation.getEndTime());
             dto.setNailService(reservation.getNailService());
             dto.setStatus(reservation.getStatus());
+            dto.setCustomerId(reservation.getCustomerId());
             dtos.add(dto);
         }
         return dtos;

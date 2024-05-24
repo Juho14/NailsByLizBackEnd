@@ -79,6 +79,7 @@ public class ReservationServiceApplication {
 	 * reservation1.setStartTime(firstAppointment);
 	 * reservation1.setNailService(gelPolish);
 	 * reservation1.setPrice(gelPolish.getPrice());
+	 * reservation1.setCustomerId(null);
 	 * reservation1.setStatus("OK");
 	 * 
 	 * ReservationEntity reservation2 = new ReservationEntity();
@@ -92,6 +93,7 @@ public class ReservationServiceApplication {
 	 * reservation2.setStartTime(secondAppointment);
 	 * reservation2.setNailService(gelMaintenance);
 	 * reservation2.setPrice(gelMaintenance.getPrice());
+	 * reservation2.setCustomerId(null);
 	 * reservation2.setStatus("OK");
 	 * 
 	 * ReservationEntity reservation3 = new ReservationEntity();
@@ -105,6 +107,7 @@ public class ReservationServiceApplication {
 	 * reservation3.setStartTime(thirdAppointment);
 	 * reservation3.setNailService(gelRemoval);
 	 * reservation3.setPrice(gelRemoval.getPrice());
+	 * reservation3.setCustomerId(null);
 	 * reservation3.setStatus("OK");
 	 * 
 	 * // Save reservations

@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS reservation_entity (
     end_time TIMESTAMP,
     nail_service_id BIGINT,
     status VARCHAR(50),
-    FOREIGN KEY (nail_service_id) REFERENCES nail_service_entity(id)
+    FOREIGN KEY (nail_service_id) REFERENCES nail_service_entity(id),
+    FOREIGN KEY (app_user_id) REFERENCES app_user_entity(id),
 );
 
 CREATE TABLE IF NOT EXISTS reservation_settings (
