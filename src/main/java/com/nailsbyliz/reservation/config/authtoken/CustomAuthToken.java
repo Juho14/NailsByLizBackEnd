@@ -7,23 +7,23 @@ import org.springframework.security.core.GrantedAuthority;
 
 public class CustomAuthToken extends UsernamePasswordAuthenticationToken {
     private static final long serialVersionUID = 1L;
-    private long user_id;
+    private long userId;
 
     public CustomAuthToken(String principal, Object credentials,
-            Collection<? extends GrantedAuthority> authorities, long user_id) {
+            Collection<? extends GrantedAuthority> authorities, long userId) {
         super(principal, credentials, authorities);
-        this.user_id = user_id;
+        this.userId = userId;
     }
 
-    public long getUser_id() {
-        return user_id;
+    public long getUserid() {
+        return userId;
     }
 
     @Override
     public String toString() {
         return "CustomAuthenticationToken [Principal=" + getPrincipal() + ", Credentials=[PROTECTED], Authenticated="
                 + isAuthenticated() + ", Details=" + getDetails() + ", Granted Authorities=" + getAuthorities()
-                + ", User id=" + user_id + "]";
+                + ", User id=" + userId + "]";
     }
 
 }

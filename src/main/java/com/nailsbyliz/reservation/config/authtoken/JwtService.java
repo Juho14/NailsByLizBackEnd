@@ -24,11 +24,11 @@ public class JwtService {
     static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // Key must be changed in production environment
 
     // Generates a signed JWT token
-    public String getToken(AppUserDetails userDetails) {
+    public String getToken(CustomUserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("user_id", userDetails.getId());
-        claims.put("first_name", userDetails.getFname());
-        claims.put("last_name", userDetails.getLname());
+        claims.put("id", userDetails.getId());
+        claims.put("fname", userDetails.getFname());
+        claims.put("lname", userDetails.getLname());
         String token = Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .addClaims(claims)
@@ -50,7 +50,7 @@ public class JwtService {
                         .parseClaimsJws(token.replace(PREFIX, ""))
                         .getBody();
                 try {
-                    Integer userIdObject = (Integer) claims.get("user_id");
+                    Integer userIdObject = (Integer) claims.get("id");
                     if (userIdObject != null) {
                         long user_id = userIdObject.longValue();
                         CustomAuthToken customtoken = new CustomAuthToken(claims.getSubject(), null,

@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class AppUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails {
     private static final long serialVersionUID = 1L;
     private String username;
     private String password;
@@ -20,7 +20,7 @@ public class AppUserDetails implements UserDetails {
     private String city;
     private String role;
 
-    public AppUserDetails(String username, String password_hash, Collection<? extends GrantedAuthority> authorities,
+    public CustomUserDetails(String username, String password_hash, Collection<? extends GrantedAuthority> authorities,
             long id, String fname, String lname, String phone, String email, String address, String postalcode,
             String city, String role) {
         this.username = username;

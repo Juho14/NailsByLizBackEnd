@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nailsbyliz.reservation.config.authtoken.AppUserDetails;
+import com.nailsbyliz.reservation.config.authtoken.CustomUserDetails;
 import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.dto.AccountCredentialsDTO;
 import com.nailsbyliz.reservation.repositories.AppUserRepository;
@@ -33,7 +33,7 @@ public class LoginRestController {
         UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(credentials.getUsername(),
                 credentials.getPassword());
         Authentication auth = authManager.authenticate(creds);
-        AppUserDetails userDetails = (AppUserDetails) auth.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         String jwts = jwtService.getToken(userDetails);
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
