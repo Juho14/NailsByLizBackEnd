@@ -1,37 +1,45 @@
 package com.nailsbyliz.reservation.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nailsbyliz.reservation.config.authtoken.AppUserDetails;
+import com.nailsbyliz.reservation.config.authtoken.JwtService;
+import com.nailsbyliz.reservation.dto.AccountCredentialsDTO;
+import com.nailsbyliz.reservation.repositories.AppUserRepository;
+
+@CrossOrigin
 @RestController
-@RequestMapping("/api/login")
 public class LoginRestController {
+    @Autowired
+    private JwtService jwtService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    AuthenticationManager authManager;
 
-    @PostMapping
-    public ResponseEntity<String> customLogin(@RequestParam String username, @RequestParam String password) {
-        try {
-            // Perform authentication
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            // You can perform additional tasks here if needed
-            return ResponseEntity.ok("Login successful");
-        } catch (AuthenticationException e) {
-            // Handle authentication failure
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-        }
+    @Autowired
+    AppUserRepository userRepository;
+
+    @PostMapping("/api/login")
+    public ResponseEntity<?> getToken(@RequestBody AccountCredentialsDTO credentials) {
+        UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(credentials.getUsername(),
+                credentials.getPassword());
+        Authentication auth = authManager.authenticate(creds);
+        AppUserDetails userDetails = (AppUserDetails) auth.getPrincipal();
+        String jwts = jwtService.getToken(userDetails);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
+                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
+                .build();
+
     }
+
 }

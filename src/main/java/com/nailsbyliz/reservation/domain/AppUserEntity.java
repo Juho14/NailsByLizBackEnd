@@ -19,6 +19,9 @@ public class AppUserEntity {
     private String username;
     private String phone;
     private String email;
+    private String address;
+    private String postalcode;
+    private String city;
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
@@ -30,12 +33,15 @@ public class AppUserEntity {
     }
 
     public AppUserEntity(String fName, String lName, String username, String phone, String email,
-            String passwordHash, String role) {
+            String address, String postalcode, String city, String passwordHash, String role) {
         this.fName = fName;
         this.lName = lName;
         this.username = username;
         this.phone = phone;
         this.email = email;
+        this.address = address;
+        this.postalcode = postalcode;
+        this.city = city;
         this.passwordHash = passwordHash;
         this.role = role;
     }
@@ -100,6 +106,34 @@ public class AppUserEntity {
         this.role = role;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPostalcode() {
+        return this.postalcode;
+    }
+
+    public void setPostalcode(String postalcode) {
+        this.postalcode = postalcode;
+    }
+
+    public String getCity() {
+        return this.city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
     @Override
     public String toString() {
         return "{" +
@@ -109,6 +143,9 @@ public class AppUserEntity {
                 ", username='" + getUsername() + "'" +
                 ", phone='" + getPhone() + "'" +
                 ", email='" + getEmail() + "'" +
+                ", address='" + getAddress() + "'" +
+                ", postalcode='" + getPostalcode() + "'" +
+                ", city='" + getCity() + "'" +
                 ", passwordHash='" + getPasswordHash() + "'" +
                 ", role='" + getRole() + "'" +
                 "}";

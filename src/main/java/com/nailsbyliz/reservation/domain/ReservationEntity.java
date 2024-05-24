@@ -33,6 +33,7 @@ public class ReservationEntity {
     @JoinColumn(name = "nailservice_id")
     private NailServiceEntity nailService;
 
+    private Long customerId;
     private String status;
 
     public ReservationEntity() {
@@ -40,7 +41,7 @@ public class ReservationEntity {
 
     public ReservationEntity(String fName, String lName, String email, String phone, String address, String city,
             String postalcode, double price, LocalDateTime startTime, LocalDateTime endTime,
-            NailServiceEntity nailService,
+            NailServiceEntity nailService, Long customerId,
             String status) {
         this.fName = fName;
         this.lName = lName;
@@ -53,6 +54,7 @@ public class ReservationEntity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.nailService = nailService;
+        this.customerId = customerId;
         this.status = status;
     }
 
@@ -122,6 +124,14 @@ public class ReservationEntity {
 
     public void setNailService(NailServiceEntity nailService) {
         this.nailService = nailService;
+    }
+
+    public Long getCustomerId() {
+        return this.customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
     public String getStatus() {

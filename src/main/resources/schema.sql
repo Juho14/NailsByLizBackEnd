@@ -5,6 +5,9 @@ CREATE TABLE IF NOT EXISTS app_user_entity (
     username VARCHAR(30),
     phone VARCHAR(15),
     email VARCHAR(40),
+    address VARCHAR(50),
+    city VARCHAR(30),
+    postal_code VARCHAR(5),
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(30) NOT NULL
 );
