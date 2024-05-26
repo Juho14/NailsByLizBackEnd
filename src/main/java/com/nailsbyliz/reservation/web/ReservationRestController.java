@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nailsbyliz.reservation.domain.AppUserEntity;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationUserDTO;
@@ -39,23 +40,36 @@ public class ReservationRestController {
     @Autowired
     AuthService authService;
 
+    @Autowired
+    UserDetailServiceImpl userService;
+
     // To show all reservations
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getReservations() {
-        boolean isAdmin = authService.isAdmin();
+        AppUserEntity currentUser = userService.getAuthUser();
+        boolean isAdmin = false;
 
+        if (currentUser == null) {
+            // If no authenticated user is found, assume it's a regular user
+            Iterable<ReservationEntity> reservations = reservationRepository.findAll();
+            List<?> response = mapToUserDTOs(reservations);
+            return ResponseEntity.ok(response);
+        }
+
+        // Null check to prevent NullPointerException
+        System.out.println(currentUser);
+        if (currentUser.getRole() != null && "role_admin".equalsIgnoreCase(currentUser.getRole())) {
+            isAdmin = true;
+        }
         Iterable<ReservationEntity> reservations = reservationRepository.findAll();
         List<?> response;
 
-        /*
-         * if (isAdmin) {
-         * response = mapToAdminDTOs(reservations);
-         * } else {
-         * response = mapToUserDTOs(reservations);
-         * }
-         */
-        response = mapToAdminDTOs(reservations);
+        if (isAdmin) {
+            response = mapToAdminDTOs(reservations);
+        } else {
+            response = mapToUserDTOs(reservations);
+        }
 
         return ResponseEntity.ok(response);
     }
@@ -67,6 +81,9 @@ public class ReservationRestController {
             dto.setId(reservation.getId());
             dto.setStartTime(reservation.getStartTime());
             dto.setEndTime(reservation.getEndTime());
+            if (!reservation.getStatus().equalsIgnoreCase("ok")) {
+                continue;
+            }
             dto.setStatus(reservation.getStatus());
             dtos.add(dto);
         }
@@ -112,8 +129,31 @@ public class ReservationRestController {
     @GetMapping("/byday/{day}")
     public ResponseEntity<?> getReservationsByDay(
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
-        List<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
-        List<ReservationAdminDTO> response = mapToAdminDTOs(reservations);
+
+        AppUserEntity currentUser = userService.getAuthUser();
+        boolean isAdmin = false;
+
+        if (currentUser == null) {
+            // If no authenticated user is found, assume it's a regular user
+            Iterable<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
+            List<?> response = mapToUserDTOs(reservations);
+            return ResponseEntity.ok(response);
+        }
+
+        // Null check to prevent NullPointerException
+        System.out.println(currentUser);
+        if (currentUser.getRole() != null && "role_admin".equalsIgnoreCase(currentUser.getRole())) {
+            isAdmin = true;
+        }
+        Iterable<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
+        List<?> response;
+
+        if (isAdmin) {
+            response = mapToAdminDTOs(reservations);
+        } else {
+            response = mapToUserDTOs(reservations);
+        }
+
         return ResponseEntity.ok(response);
     }
 
@@ -121,8 +161,30 @@ public class ReservationRestController {
     @GetMapping("/byweek/{day}")
     public ResponseEntity<?> getReservationsByWeek(
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
-        List<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
-        List<ReservationAdminDTO> response = mapToAdminDTOs(reservations);
+        AppUserEntity currentUser = userService.getAuthUser();
+        boolean isAdmin = false;
+
+        if (currentUser == null) {
+            // If no authenticated user is found, assume it's a regular user
+            Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
+            List<?> response = mapToUserDTOs(reservations);
+            return ResponseEntity.ok(response);
+        }
+
+        // Null check to prevent NullPointerException
+        System.out.println(currentUser);
+        if (currentUser.getRole() != null && "role_admin".equalsIgnoreCase(currentUser.getRole())) {
+            isAdmin = true;
+        }
+        Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
+        List<?> response;
+
+        if (isAdmin) {
+            response = mapToAdminDTOs(reservations);
+        } else {
+            response = mapToUserDTOs(reservations);
+        }
+
         return ResponseEntity.ok(response);
     }
 

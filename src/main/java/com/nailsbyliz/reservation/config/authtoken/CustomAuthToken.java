@@ -9,7 +9,7 @@ public class CustomAuthToken extends UsernamePasswordAuthenticationToken {
     private static final long serialVersionUID = 1L;
     private long userId;
 
-    public CustomAuthToken(String principal, Object credentials,
+    public CustomAuthToken(CustomUserDetails principal, Object credentials,
             Collection<? extends GrantedAuthority> authorities, long userId) {
         super(principal, credentials, authorities);
         this.userId = userId;
@@ -25,5 +25,4 @@ public class CustomAuthToken extends UsernamePasswordAuthenticationToken {
                 + isAuthenticated() + ", Details=" + getDetails() + ", Granted Authorities=" + getAuthorities()
                 + ", User id=" + userId + "]";
     }
-
 }
