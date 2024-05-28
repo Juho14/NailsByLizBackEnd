@@ -37,7 +37,13 @@ public class JwtService {
         claims.put("id", userDetails.getId());
         claims.put("fname", userDetails.getFname());
         claims.put("lname", userDetails.getLname());
-        String token = Jwts.builder()
+        claims.put("phone", userDetails.getPhone());
+        claims.put("email", userDetails.getEmail());
+        claims.put("address", userDetails.getAddress());
+        claims.put("city", userDetails.getCity());
+        claims.put("role", userDetails.getRole());
+        String token = Jwts
+                .builder()
                 .setSubject(userDetails.getUsername())
                 .addClaims(claims)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
