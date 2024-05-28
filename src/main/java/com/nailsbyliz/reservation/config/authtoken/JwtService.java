@@ -40,6 +40,7 @@ public class JwtService {
         claims.put("phone", userDetails.getPhone());
         claims.put("email", userDetails.getEmail());
         claims.put("address", userDetails.getAddress());
+        claims.put("postalcode", userDetails.getPostalcode());
         claims.put("city", userDetails.getCity());
         claims.put("role", userDetails.getRole());
         String token = Jwts
