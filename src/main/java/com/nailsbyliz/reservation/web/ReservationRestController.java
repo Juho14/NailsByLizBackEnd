@@ -1,5 +1,6 @@
 package com.nailsbyliz.reservation.web;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -134,24 +135,27 @@ public class ReservationRestController {
 
     private List<ReservationUserDTO> mapToUserDTOs(Iterable<ReservationEntity> reservations) {
         List<ReservationUserDTO> dtos = new ArrayList<>();
+        LocalDateTime dayBefore = LocalDateTime.now().minusDays(1);
         for (ReservationEntity reservation : reservations) {
             if (!reservation.getStatus().equalsIgnoreCase("ok")) {
                 continue;
             }
-
+            LocalDateTime startTime = reservation.getStartTime();
+            // Check if the startTime is within the acceptable range
+            if (startTime.isBefore(dayBefore)) {
+                continue;
+            }
             ReservationUserDTO dto = new ReservationUserDTO();
             dto.setId(reservation.getId());
-            dto.setStartTime(reservation.getStartTime());
+            dto.setStartTime(startTime);
             dto.setEndTime(reservation.getEndTime());
             dto.setFName(reservation.getFName());
             dto.setLName(reservation.getLName());
             dto.setPrice(reservation.getPrice());
-
             NailServiceCustomerDTO nailServiceDto = mapServiceToCustomerDTO(reservation.getNailService());
             if (nailServiceDto != null) {
                 dto.setNailService(nailServiceDto);
             }
-
             dtos.add(dto);
         }
         return dtos;
