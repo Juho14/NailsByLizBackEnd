@@ -1,13 +1,13 @@
 package com.nailsbyliz.reservation.web;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +17,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.dto.NailServiceAdminDTO;
 import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
 import com.nailsbyliz.reservation.repositories.NailServiceRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.NailService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 // @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -38,29 +41,45 @@ public class NailServiceRestController {
     @Autowired
     AuthService authService;
 
+    @Autowired
+    JwtService jwtService;
+
     // To show all available services
     @GetMapping
     @PreAuthorize("permitAll()")
-    public ResponseEntity<?> getAllNailServices(Authentication authentication) {
-
-        boolean isAdmin = authService.isAdmin();
-
+    public ResponseEntity<?> getAllNailServices(HttpServletRequest request) {
         Iterable<NailServiceEntity> services = nailRepo.findAll();
-
         List<?> response;
 
-        /*
-         * if (isAdmin) {
-         * response = mapToAdminDTOs(services);
-         * } else {
-         * response = mapToCustomerDTOs(services);
-         * }
-         */
-        response = mapToAdminDTOs(services);
-        return ResponseEntity.ok(response);
+        // Extract the JWT token from the request headers
+        String token = jwtService.resolveToken(request);
 
+        // Check if the token is present
+        if (token != null) {
+            // Token is present, validate it
+            if (jwtService.validateToken(token)) {
+                // Token is valid
+                String role = jwtService.getRoleFromToken(token);
+                boolean isAdmin = "ROLE_ADMIN".equals(role);
+
+                if (isAdmin) {
+                    response = mapToAdminDTOs(services);
+                } else {
+                    response = mapToCustomerDTOs(services);
+                }
+
+                return ResponseEntity.ok(response);
+            } else {
+                // Token is invalid, return response indicating invalid token
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+        } else {
+            response = mapToCustomerDTOs(services);
+            return ResponseEntity.ok(response);
+        }
     }
 
+    // Method to map Iterable<NailServiceEntity> to List<NailServiceAdminDTO>
     private List<NailServiceAdminDTO> mapToAdminDTOs(Iterable<NailServiceEntity> services) {
         List<NailServiceAdminDTO> dtos = new ArrayList<>();
         for (NailServiceEntity service : services) {
@@ -75,6 +94,7 @@ public class NailServiceRestController {
         return dtos;
     }
 
+    // Method to map Iterable<NailServiceEntity> to List<NailServiceCustomerDTO>
     private List<NailServiceCustomerDTO> mapToCustomerDTOs(Iterable<NailServiceEntity> services) {
         List<NailServiceCustomerDTO> dtos = new ArrayList<>();
         for (NailServiceEntity service : services) {
@@ -94,13 +114,37 @@ public class NailServiceRestController {
 
     // To show a specific service
     @GetMapping("/{serviceId}")
-    public ResponseEntity<NailServiceEntity> getServiceById(@PathVariable Long serviceId) {
-        NailServiceEntity service = nailService.getNailServiceEntityById(serviceId);
+    public ResponseEntity<?> getServiceById(@PathVariable Long serviceId, HttpServletRequest request) {
+        List<Long> ids = Collections.singletonList(serviceId);
+        Iterable<NailServiceEntity> service = nailRepo.findAllById(ids);
 
-        if (service != null) {
-            return ResponseEntity.ok(service);
+        List<?> response;
+
+        // Extract the JWT token from the request headers
+        String token = jwtService.resolveToken(request);
+
+        // Check if the token is present
+        if (token != null) {
+            // Token is present, validate it
+            if (jwtService.validateToken(token)) {
+                // Token is valid
+                String role = jwtService.getRoleFromToken(token);
+                boolean isAdmin = "ROLE_ADMIN".equals(role);
+
+                if (isAdmin) {
+                    response = mapToAdminDTOs(service);
+                } else {
+                    response = mapToCustomerDTOs(service);
+                }
+
+                return ResponseEntity.ok(response);
+            } else {
+                // Token is invalid, return response indicating invalid token
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
         } else {
-            return ResponseEntity.notFound().build();
+            response = mapToCustomerDTOs(service);
+            return ResponseEntity.ok(response);
         }
     }
 

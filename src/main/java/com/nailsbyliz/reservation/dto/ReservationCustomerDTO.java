@@ -2,7 +2,7 @@ package com.nailsbyliz.reservation.dto;
 
 import java.time.LocalDateTime;
 
-public class ReservationUserDTO {
+public class ReservationCustomerDTO {
     private Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

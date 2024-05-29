@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
-import com.nailsbyliz.reservation.dto.ReservationUserDTO;
+import com.nailsbyliz.reservation.dto.ReservationCustomerDTO;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
@@ -69,7 +69,7 @@ public class ReservationRestController {
                 if (isAdmin) {
                     response = mapToAdminDTOs(reservations);
                 } else {
-                    response = mapToUserDTOs(reservations);
+                    response = mapToCustomerDTOs(reservations);
                 }
 
                 return ResponseEntity.ok(response);
@@ -80,15 +80,15 @@ public class ReservationRestController {
         } else {
             // Token is not present, return data for regular users
             Iterable<ReservationEntity> reservations = reservationRepository.findAll();
-            List<?> response = mapToUserDTOs(reservations);
+            List<?> response = mapToCustomerDTOs(reservations);
             return ResponseEntity.ok(response);
         }
     }
 
-    private List<ReservationUserDTO> mapToUserDTOs(Iterable<ReservationEntity> reservations) {
-        List<ReservationUserDTO> dtos = new ArrayList<>();
+    private List<ReservationCustomerDTO> mapToCustomerDTOs(Iterable<ReservationEntity> reservations) {
+        List<ReservationCustomerDTO> dtos = new ArrayList<>();
         for (ReservationEntity reservation : reservations) {
-            ReservationUserDTO dto = new ReservationUserDTO();
+            ReservationCustomerDTO dto = new ReservationCustomerDTO();
             dto.setId(reservation.getId());
             dto.setStartTime(reservation.getStartTime());
             dto.setEndTime(reservation.getEndTime());
@@ -159,7 +159,7 @@ public class ReservationRestController {
                 if (isAdmin) {
                     response = mapToAdminDTOs(reservations);
                 } else {
-                    response = mapToUserDTOs(reservations);
+                    response = mapToCustomerDTOs(reservations);
                 }
 
                 return ResponseEntity.ok(response);
@@ -170,7 +170,7 @@ public class ReservationRestController {
         } else {
             // Token is not present, return data for regular users
             Iterable<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
-            List<?> response = mapToUserDTOs(reservations);
+            List<?> response = mapToCustomerDTOs(reservations);
             return ResponseEntity.ok(response);
         }
     }
@@ -198,7 +198,7 @@ public class ReservationRestController {
                 if (isAdmin) {
                     response = mapToAdminDTOs(reservations);
                 } else {
-                    response = mapToUserDTOs(reservations);
+                    response = mapToCustomerDTOs(reservations);
                 }
 
                 return ResponseEntity.ok(response);
@@ -209,7 +209,7 @@ public class ReservationRestController {
         } else {
             // Token is not present, return data for regular users
             Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
-            List<?> response = mapToUserDTOs(reservations);
+            List<?> response = mapToCustomerDTOs(reservations);
             return ResponseEntity.ok(response);
         }
     }
