@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.config.authtoken.JwtService;
+import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
+import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationUserDTO;
@@ -119,21 +121,37 @@ public class ReservationRestController {
             dtos.add(dto);
         }
         return dtos;
+
+    }
+
+    private NailServiceCustomerDTO mapServiceToCustomerDTO(NailServiceEntity service) {
+        NailServiceCustomerDTO dto = new NailServiceCustomerDTO();
+        dto.setId(service.getId());
+        dto.setType(service.getType());
+        dto.setDuration(service.getDuration());
+        return dto;
     }
 
     private List<ReservationUserDTO> mapToUserDTOs(Iterable<ReservationEntity> reservations) {
         List<ReservationUserDTO> dtos = new ArrayList<>();
         for (ReservationEntity reservation : reservations) {
-            ReservationUserDTO dto = new ReservationUserDTO();
             if (!reservation.getStatus().equalsIgnoreCase("ok")) {
                 continue;
             }
+
+            ReservationUserDTO dto = new ReservationUserDTO();
             dto.setId(reservation.getId());
             dto.setStartTime(reservation.getStartTime());
             dto.setEndTime(reservation.getEndTime());
             dto.setFName(reservation.getFName());
             dto.setLName(reservation.getLName());
             dto.setPrice(reservation.getPrice());
+
+            NailServiceCustomerDTO nailServiceDto = mapServiceToCustomerDTO(reservation.getNailService());
+            if (nailServiceDto != null) {
+                dto.setNailService(nailServiceDto);
+            }
+
             dtos.add(dto);
         }
         return dtos;

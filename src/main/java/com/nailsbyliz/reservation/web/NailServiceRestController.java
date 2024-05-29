@@ -63,9 +63,9 @@ public class NailServiceRestController {
                 boolean isAdmin = "ROLE_ADMIN".equals(role);
 
                 if (isAdmin) {
-                    response = mapToAdminDTOs(services);
+                    response = mapServiceToAdminDTOs(services);
                 } else {
-                    response = mapToCustomerDTOs(services);
+                    response = mapServiceToCustomerDTOs(services);
                 }
 
                 return ResponseEntity.ok(response);
@@ -74,13 +74,13 @@ public class NailServiceRestController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
             }
         } else {
-            response = mapToCustomerDTOs(services);
+            response = mapServiceToCustomerDTOs(services);
             return ResponseEntity.ok(response);
         }
     }
 
     // Method to map Iterable<NailServiceEntity> to List<NailServiceAdminDTO>
-    private List<NailServiceAdminDTO> mapToAdminDTOs(Iterable<NailServiceEntity> services) {
+    private List<NailServiceAdminDTO> mapServiceToAdminDTOs(Iterable<NailServiceEntity> services) {
         List<NailServiceAdminDTO> dtos = new ArrayList<>();
         for (NailServiceEntity service : services) {
             NailServiceAdminDTO dto = new NailServiceAdminDTO();
@@ -95,7 +95,7 @@ public class NailServiceRestController {
     }
 
     // Method to map Iterable<NailServiceEntity> to List<NailServiceCustomerDTO>
-    private List<NailServiceCustomerDTO> mapToCustomerDTOs(Iterable<NailServiceEntity> services) {
+    private List<NailServiceCustomerDTO> mapServiceToCustomerDTOs(Iterable<NailServiceEntity> services) {
         List<NailServiceCustomerDTO> dtos = new ArrayList<>();
         for (NailServiceEntity service : services) {
             // Skip all admin-only services
@@ -132,9 +132,9 @@ public class NailServiceRestController {
                 boolean isAdmin = "ROLE_ADMIN".equals(role);
 
                 if (isAdmin) {
-                    response = mapToAdminDTOs(service);
+                    response = mapServiceToAdminDTOs(service);
                 } else {
-                    response = mapToCustomerDTOs(service);
+                    response = mapServiceToCustomerDTOs(service);
                 }
 
                 return ResponseEntity.ok(response);
@@ -143,7 +143,7 @@ public class NailServiceRestController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
             }
         } else {
-            response = mapToCustomerDTOs(service);
+            response = mapServiceToCustomerDTOs(service);
             return ResponseEntity.ok(response);
         }
     }

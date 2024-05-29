@@ -2,8 +2,6 @@ package com.nailsbyliz.reservation.dto;
 
 import java.time.LocalDateTime;
 
-import com.nailsbyliz.reservation.domain.NailServiceEntity;
-
 public class ReservationUserDTO {
     private Long id;
     private String fName;
@@ -11,7 +9,7 @@ public class ReservationUserDTO {
     private double price;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private NailServiceEntity nailService;
+    private NailServiceCustomerDTO nailService;
 
     public Long getId() {
         return this.id;
@@ -61,11 +59,11 @@ public class ReservationUserDTO {
         this.endTime = endTime;
     }
 
-    public NailServiceEntity getNailService() {
+    public NailServiceCustomerDTO getNailService() {
         return this.nailService;
     }
 
-    public void setNailService(NailServiceEntity nailService) {
+    public void setNailService(NailServiceCustomerDTO nailService) {
         this.nailService = nailService;
     }
 }
