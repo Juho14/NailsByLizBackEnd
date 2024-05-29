@@ -86,7 +86,7 @@ public class AppUserRestController {
 
     // Change password
     @PutMapping("/password")
-    public ResponseEntity<String> updatePassword(@RequestBody AppUserEntity updatedUser,
+    public ResponseEntity<?> updatePassword(@RequestBody AppUserEntity updatedUser,
             HttpServletRequest request) {
         String token = jwtService.resolveToken(request);
         if (!jwtService.validateToken(token)) {
@@ -98,7 +98,7 @@ public class AppUserRestController {
         }
         AppUserEntity user = userService.changePassword(userId, updatedUser);
         if (user != null) {
-            return ResponseEntity.ok(user.toString());
+            return ResponseEntity.ok(user);
         } else {
             return ResponseEntity.notFound().build();
         }
