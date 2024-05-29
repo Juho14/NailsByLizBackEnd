@@ -105,8 +105,6 @@ public class ReservationRestController {
         }
     }
 
-    }
-
     private List<ReservationCustomerDTO> mapToCustomerDTOs(Iterable<ReservationEntity> reservations) {
         List<ReservationCustomerDTO> dtos = new ArrayList<>();
         for (ReservationEntity reservation : reservations) {
