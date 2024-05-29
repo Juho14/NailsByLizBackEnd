@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.AppUserEntity;
 import com.nailsbyliz.reservation.repositories.AppUserRepository;
 import com.nailsbyliz.reservation.service.AppUserService;
@@ -30,6 +32,9 @@ public class AppUserRestController {
 
     @Autowired
     AuthService authService;
+
+    @Autowired
+    JwtService jwtService;
 
     // Get all users
     @GetMapping
@@ -71,17 +76,18 @@ public class AppUserRestController {
 
     // Delete a user
     @DeleteMapping
-    public ResponseEntity<Void> deleteAppUser(@RequestBody AppUserEntity deletedUser) {
-        Long userId = deletedUser.getId();
+    public ResponseEntity<Void> deleteAppUser(@RequestHeader("Authorization") String token) {
+        Long userId = jwtService.getIdFromToken(token);
         boolean deleted = userService.deleteUser(userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     // Change password
     @PutMapping("/password")
-    public ResponseEntity<AppUserEntity> updatePassword(@RequestBody AppUserEntity updatedAppUser) {
-        AppUserEntity currentUser = authService.getCurrentUser();
-        AppUserEntity user = userService.changePassword(currentUser.getId(), updatedAppUser);
+    public ResponseEntity<AppUserEntity> updatePassword(@RequestHeader("Authorization") String token,
+            @RequestBody AppUserEntity updatedUser) {
+        Long userId = jwtService.getIdFromToken(token);
+        AppUserEntity user = userService.changePassword(userId, updatedUser);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {

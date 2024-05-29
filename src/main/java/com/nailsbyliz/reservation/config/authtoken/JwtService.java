@@ -59,11 +59,7 @@ public class JwtService {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         try {
             if (token != null) {
-                Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(key)
-                        .build()
-                        .parseClaimsJws(token.replace(PREFIX, ""))
-                        .getBody();
+                Claims claims = getClaimsFromToken(token);
 
                 Integer userIdObject = (Integer) claims.get("id");
                 if (userIdObject != null) {
@@ -95,5 +91,24 @@ public class JwtService {
         } catch (Exception e) {
             throw new BadCredentialsException("Invalid token", e);
         }
+    }
+
+    // Method to extract the user ID from the token
+    public Long getIdFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        Integer userIdObject = (Integer) claims.get("id");
+        if (userIdObject != null) {
+            return userIdObject.longValue();
+        }
+        throw new BadCredentialsException("User ID not found in token");
+    }
+
+    // Utility method to parse claims from token
+    private Claims getClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token.replace(PREFIX, ""))
+                .getBody();
     }
 }
