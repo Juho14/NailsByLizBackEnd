@@ -9,4 +9,7 @@ import com.nailsbyliz.reservation.domain.ReservationEntity;
 
 public interface ReservationRepository extends CrudRepository<ReservationEntity, Long> {
     List<ReservationEntity> findByNailService(NailServiceEntity nailService);
+
+    Iterable<ReservationEntity> findByCustomerId(Long customerId);
+
 }

@@ -21,6 +21,7 @@ import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationCustomerDTO;
+import com.nailsbyliz.reservation.dto.ReservationUserDTO;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
@@ -85,6 +86,27 @@ public class ReservationRestController {
         }
     }
 
+    @GetMapping("/myreservations")
+    public ResponseEntity<?> getReservationsForUser(HttpServletRequest request) {
+
+        // Extract the JWT token from the request headers
+        String token = jwtService.resolveToken(request);
+
+        // Validate token
+        if (jwtService.validateToken(token)) {
+            Long customerId = jwtService.getIdFromToken(token);
+            Iterable<ReservationEntity> reservations;
+            reservations = reservationRepository.findByCustomerId(customerId);
+            List<?> response = mapToUserDTOs(reservations);
+            return ResponseEntity.ok(response);
+        } else {
+            // Token is invalid, return response indicating invalid token
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+    }
+
+    }
+
     private List<ReservationCustomerDTO> mapToCustomerDTOs(Iterable<ReservationEntity> reservations) {
         List<ReservationCustomerDTO> dtos = new ArrayList<>();
         for (ReservationEntity reservation : reservations) {
@@ -96,6 +118,24 @@ public class ReservationRestController {
                 continue;
             }
             dto.setStatus(reservation.getStatus());
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    private List<ReservationUserDTO> mapToUserDTOs(Iterable<ReservationEntity> reservations) {
+        List<ReservationUserDTO> dtos = new ArrayList<>();
+        for (ReservationEntity reservation : reservations) {
+            ReservationUserDTO dto = new ReservationUserDTO();
+            if (!reservation.getStatus().equalsIgnoreCase("ok")) {
+                continue;
+            }
+            dto.setId(reservation.getId());
+            dto.setStartTime(reservation.getStartTime());
+            dto.setEndTime(reservation.getEndTime());
+            dto.setFName(reservation.getFName());
+            dto.setLName(reservation.getLName());
+            dto.setPrice(reservation.getPrice());
             dtos.add(dto);
         }
         return dtos;
