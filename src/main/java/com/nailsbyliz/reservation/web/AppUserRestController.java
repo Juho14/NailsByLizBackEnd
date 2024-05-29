@@ -71,7 +71,8 @@ public class AppUserRestController {
 
     // Delete a user
     @DeleteMapping
-    public ResponseEntity<Void> deleteAppUser(@PathVariable Long userId) {
+    public ResponseEntity<Void> deleteAppUser(@RequestBody AppUserEntity deletedUser) {
+        Long userId = deletedUser.getId();
         boolean deleted = userService.deleteUser(userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
