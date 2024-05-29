@@ -19,6 +19,8 @@ import com.nailsbyliz.reservation.repositories.AppUserRepository;
 import com.nailsbyliz.reservation.service.AppUserService;
 import com.nailsbyliz.reservation.service.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/users")
 // @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -84,12 +86,19 @@ public class AppUserRestController {
 
     // Change password
     @PutMapping("/password")
-    public ResponseEntity<AppUserEntity> updatePassword(@RequestHeader("Authorization") String token,
-            @RequestBody AppUserEntity updatedUser) {
+    public ResponseEntity<String> updatePassword(@RequestBody AppUserEntity updatedUser,
+            HttpServletRequest request) {
+        String token = jwtService.resolveToken(request);
+        if (!jwtService.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
         Long userId = jwtService.getIdFromToken(token);
+        if (userId != updatedUser.getId()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid ID");
+        }
         AppUserEntity user = userService.changePassword(userId, updatedUser);
         if (user != null) {
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(user.toString());
         } else {
             return ResponseEntity.notFound().build();
         }

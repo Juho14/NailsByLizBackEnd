@@ -40,9 +40,13 @@ public class AppUserServiceImpl implements AppUserService {
 
             existingUser.setFName(updatedUser.getFName());
             existingUser.setLName(updatedUser.getLName());
+            existingUser.setUsername(updatedUser.getUsername());
             existingUser.setPhone(updatedUser.getPhone());
             existingUser.setEmail(updatedUser.getEmail());
             existingUser.setUsername(updatedUser.getUsername());
+            existingUser.setAddress(updatedUser.getAddress());
+            existingUser.setPostalcode(updatedUser.getPostalcode());
+            existingUser.setCity(updatedUser.getCity());
             existingUser.setRole(updatedUser.getRole());
             return userRepo.save(existingUser);
         } else {
@@ -60,7 +64,6 @@ public class AppUserServiceImpl implements AppUserService {
             existingUser.setPasswordHash(passwordEncoder.encode(updatedUser.getPasswordHash()));
             return userRepo.save(existingUser);
         } else {
-
             return null;
         }
     }
