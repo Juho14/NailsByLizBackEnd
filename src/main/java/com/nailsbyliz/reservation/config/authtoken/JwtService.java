@@ -111,4 +111,30 @@ public class JwtService {
                 .parseClaimsJws(token.replace(PREFIX, ""))
                 .getBody();
     }
+
+    public boolean validateToken(String token) {
+        try {
+            // Parse the token and verify its signature
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token.replace(PREFIX, ""));
+            // Check if the token has expired
+            return true;
+        } catch (Exception e) {
+            // Token validation failed
+            return false;
+        }
+    }
+
+    public String resolveToken(HttpServletRequest request) {
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (token != null && token.startsWith(PREFIX)) {
+            return token.substring(PREFIX.length()).trim();
+        }
+        return null;
+    }
+
+    public String getRoleFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        return (String) claims.get("role");
+    }
+
 }

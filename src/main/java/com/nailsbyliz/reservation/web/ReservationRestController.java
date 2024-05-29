@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,13 +17,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nailsbyliz.reservation.domain.AppUserEntity;
+import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationUserDTO;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -41,37 +42,47 @@ public class ReservationRestController {
     AuthService authService;
 
     @Autowired
+    JwtService jwtService;
+
+    @Autowired
     UserDetailServiceImpl userService;
 
     // To show all reservations
     @GetMapping
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<?> getReservations() {
-        AppUserEntity currentUser = userService.getAuthUser();
-        boolean isAdmin = false;
+    public ResponseEntity<?> getAllReservations(
+            HttpServletRequest request) {
 
-        if (currentUser == null) {
-            // If no authenticated user is found, assume it's a regular user
+        // Extract the JWT token from the request headers
+        String token = jwtService.resolveToken(request);
+
+        // Check if the token is present
+        if (token != null) {
+            // Token is present, validate it
+            if (jwtService.validateToken(token)) {
+                // Token is valid
+                String role = jwtService.getRoleFromToken(token);
+                boolean isAdmin = "ROLE_ADMIN".equals(role);
+
+                Iterable<ReservationEntity> reservations = reservationRepository.findAll();
+                List<?> response;
+
+                if (isAdmin) {
+                    response = mapToAdminDTOs(reservations);
+                } else {
+                    response = mapToUserDTOs(reservations);
+                }
+
+                return ResponseEntity.ok(response);
+            } else {
+                // Token is invalid, return response indicating invalid token
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+        } else {
+            // Token is not present, return data for regular users
             Iterable<ReservationEntity> reservations = reservationRepository.findAll();
             List<?> response = mapToUserDTOs(reservations);
             return ResponseEntity.ok(response);
         }
-
-        // Null check to prevent NullPointerException
-        System.out.println(currentUser);
-        if (currentUser.getRole() != null && "role_admin".equalsIgnoreCase(currentUser.getRole())) {
-            isAdmin = true;
-        }
-        Iterable<ReservationEntity> reservations = reservationRepository.findAll();
-        List<?> response;
-
-        if (isAdmin) {
-            response = mapToAdminDTOs(reservations);
-        } else {
-            response = mapToUserDTOs(reservations);
-        }
-
-        return ResponseEntity.ok(response);
     }
 
     private List<ReservationUserDTO> mapToUserDTOs(Iterable<ReservationEntity> reservations) {
@@ -127,65 +138,80 @@ public class ReservationRestController {
 
     // End point to fetch reservations of a given date
     @GetMapping("/byday/{day}")
-    public ResponseEntity<?> getReservationsByDay(
-            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
+    public ResponseEntity<?> getReservationsByDayAUth(
+            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
+            HttpServletRequest request) {
 
-        AppUserEntity currentUser = userService.getAuthUser();
-        boolean isAdmin = false;
+        // Extract the JWT token from the request headers
+        String token = jwtService.resolveToken(request);
 
-        if (currentUser == null) {
-            // If no authenticated user is found, assume it's a regular user
+        // Check if the token is present
+        if (token != null) {
+            // Token is present, validate it
+            if (jwtService.validateToken(token)) {
+                // Token is valid
+                String role = jwtService.getRoleFromToken(token);
+                boolean isAdmin = "ROLE_ADMIN".equals(role);
+
+                Iterable<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
+                List<?> response;
+
+                if (isAdmin) {
+                    response = mapToAdminDTOs(reservations);
+                } else {
+                    response = mapToUserDTOs(reservations);
+                }
+
+                return ResponseEntity.ok(response);
+            } else {
+                // Token is invalid, return response indicating invalid token
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+        } else {
+            // Token is not present, return data for regular users
             Iterable<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
             List<?> response = mapToUserDTOs(reservations);
             return ResponseEntity.ok(response);
         }
-
-        // Null check to prevent NullPointerException
-        System.out.println(currentUser);
-        if (currentUser.getRole() != null && "role_admin".equalsIgnoreCase(currentUser.getRole())) {
-            isAdmin = true;
-        }
-        Iterable<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
-        List<?> response;
-
-        if (isAdmin) {
-            response = mapToAdminDTOs(reservations);
-        } else {
-            response = mapToUserDTOs(reservations);
-        }
-
-        return ResponseEntity.ok(response);
     }
 
     // End point to fetch all reservations of a week. Used for rendering timeslots
     @GetMapping("/byweek/{day}")
     public ResponseEntity<?> getReservationsByWeek(
-            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
-        AppUserEntity currentUser = userService.getAuthUser();
-        boolean isAdmin = false;
+            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
+            HttpServletRequest request) {
 
-        if (currentUser == null) {
-            // If no authenticated user is found, assume it's a regular user
+        // Extract the JWT token from the request headers
+        String token = jwtService.resolveToken(request);
+
+        // Check if the token is present
+        if (token != null) {
+            // Token is present, validate it
+            if (jwtService.validateToken(token)) {
+                // Token is valid
+                String role = jwtService.getRoleFromToken(token);
+                boolean isAdmin = "ROLE_ADMIN".equals(role);
+
+                Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
+                List<?> response;
+
+                if (isAdmin) {
+                    response = mapToAdminDTOs(reservations);
+                } else {
+                    response = mapToUserDTOs(reservations);
+                }
+
+                return ResponseEntity.ok(response);
+            } else {
+                // Token is invalid, return response indicating invalid token
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+        } else {
+            // Token is not present, return data for regular users
             Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
             List<?> response = mapToUserDTOs(reservations);
             return ResponseEntity.ok(response);
         }
-
-        // Null check to prevent NullPointerException
-        System.out.println(currentUser);
-        if (currentUser.getRole() != null && "role_admin".equalsIgnoreCase(currentUser.getRole())) {
-            isAdmin = true;
-        }
-        Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
-        List<?> response;
-
-        if (isAdmin) {
-            response = mapToAdminDTOs(reservations);
-        } else {
-            response = mapToUserDTOs(reservations);
-        }
-
-        return ResponseEntity.ok(response);
     }
 
     // Create a new reservation
