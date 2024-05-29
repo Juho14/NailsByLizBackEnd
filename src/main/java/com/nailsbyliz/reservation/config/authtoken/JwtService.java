@@ -17,7 +17,6 @@ import com.nailsbyliz.reservation.repositories.AppUserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -26,7 +25,10 @@ public class JwtService {
 
     static final long EXPIRATIONTIME = 1000 * 60 * 60 * 24;
     static final String PREFIX = "Bearer";
-    static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // Key must be changed in production environment
+    String secretKey = System.getenv("JWT_SECRET_KEY");
+    // static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // Key
+    // must be changed in production environment
+    Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
 
     @Autowired
     private AppUserRepository repository;
@@ -48,9 +50,13 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .addClaims(claims)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
-                .signWith(key)
+                .signWith(getKey())
                 .compact();
         return token;
+    }
+
+    private Key getKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     // Gets a token from request Authorization header, verifies a token, gets user
