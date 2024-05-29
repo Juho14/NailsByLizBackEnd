@@ -1,5 +1,6 @@
 package com.nailsbyliz.reservation.web;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -290,6 +291,47 @@ public class ReservationRestController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/cancel/{reservationId}")
+    public ResponseEntity<String> cancelReservation(@PathVariable Long reservationId, HttpServletRequest request) {
+        ReservationEntity reservation = reservationService.getReservationById(reservationId);
+
+        if (reservation == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startTime = reservation.getStartTime();
+        Duration duration = Duration.between(now, startTime);
+
+        if (duration.toHours() < 24) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Reservation cannot be canceled less than 24 hours before the start time.");
+        }
+
+        String token = jwtService.resolveToken(request);
+        boolean isValid = jwtService.validateToken(token);
+
+        if (!isValid) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        Long userId = jwtService.getIdFromToken(token);
+        String userRole = jwtService.getRoleFromToken(token);
+
+        if (!reservation.getCustomerId().equals(userId) && !"ROLE_ADMIN".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+        }
+
+        reservation.setStatus("Peruttu");
+        ReservationEntity result = reservationService.updateReservation(reservationId, reservation);
+
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error canceling the reservation.");
+        }
+
+        return ResponseEntity.ok(result.toString());
     }
 
     @DeleteMapping("/{reservationId}")
