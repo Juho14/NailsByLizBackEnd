@@ -34,7 +34,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/reservations")
-// @PreAuthorize("hasRole('ADMIN')")
 public class ReservationRestController {
 
     @Autowired
@@ -102,6 +101,25 @@ public class ReservationRestController {
             Iterable<ReservationEntity> reservations;
             reservations = reservationRepository.findByCustomerId(customerId);
             List<?> response = mapToUserDTOs(reservations);
+            return ResponseEntity.ok(response);
+        } else {
+            // Token is invalid, return response indicating invalid token
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<?> getReservationsForUser(HttpServletRequest request, @PathVariable Long customerId) {
+        // Extract the JWT token from the request headers
+        String token = jwtService.resolveToken(request);
+        String role = jwtService.getRoleFromToken(token);
+        boolean isAdmin = "ROLE_ADMIN".equals(role);
+
+        // Validate token
+        if (jwtService.validateToken(token) && isAdmin) {
+            Iterable<ReservationEntity> reservations;
+            reservations = reservationRepository.findByCustomerId(customerId);
+            List<?> response = mapToAdminDTOs(reservations);
             return ResponseEntity.ok(response);
         } else {
             // Token is invalid, return response indicating invalid token
