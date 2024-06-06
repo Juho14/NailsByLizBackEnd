@@ -1,5 +1,10 @@
 package com.nailsbyliz.reservation.web;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +94,40 @@ public class AppUserRestController {
         Long userId = jwtService.getIdFromToken(token);
         boolean deleted = userService.deleteUser(userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    // Delete a specific
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Void> deleteAppUser(@RequestHeader("Authorization") String token, @PathVariable Long userId) {
+        String role = jwtService.getRoleFromToken(token);
+        boolean isAdmin = "ROLE_ADMIN".equals(role);
+
+        if (jwtService.validateToken(token) && isAdmin) {
+            Optional<AppUserEntity> deletedUserOptional = userRepo.findById(userId);
+            AppUserEntity deletedUser = null;
+            String deletedUserRole = "";
+            if (deletedUserOptional.isPresent()) {
+                deletedUser = deletedUserOptional.get();
+                deletedUserRole = deletedUser.getRole();
+            }
+            // Token is valid
+            if (deletedUserRole == "ROLE_ADMIN") {
+                Iterable<AppUserEntity> admins = userRepo.findByRole("ROLE_ADMIN");
+                List<AppUserEntity> adminList = StreamSupport.stream(admins.spliterator(), false)
+                        .collect(Collectors.toList());
+
+                int adminCount = adminList.size();
+
+                if (adminCount < 2) {
+                    return ResponseEntity.badRequest().build();
+                }
+            }
+
+            boolean deleted = userService.deleteUser(userId);
+            return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // Change password
