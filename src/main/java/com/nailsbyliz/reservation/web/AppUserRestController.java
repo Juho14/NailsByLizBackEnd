@@ -97,7 +97,7 @@ public class AppUserRestController {
     }
 
     // Delete a specific
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteAppUser(@RequestHeader("Authorization") String token, @PathVariable Long userId) {
         String role = jwtService.getRoleFromToken(token);
         boolean isAdmin = "ROLE_ADMIN".equals(role);
