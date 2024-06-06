@@ -46,7 +46,7 @@ public class AppUserRestController {
     }
 
     // Get a specific user
-    @GetMapping("/{appUserId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<AppUserEntity> getaAppUserById(@PathVariable Long userId) {
         AppUserEntity appUser = userService.getUserById(userId);
         if (appUser != null) {
