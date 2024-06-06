@@ -45,6 +45,13 @@ public class AppUserRestController {
         return ResponseEntity.ok(appUsers);
     }
 
+    // Get admins
+    @GetMapping("/admins")
+    public ResponseEntity<Iterable<AppUserEntity>> getAdmins() {
+        Iterable<AppUserEntity> admins = userRepo.findByRole("ROLE_ADMIN");
+        return ResponseEntity.ok(admins);
+    }
+
     // Get a specific user
     @GetMapping("/{userId}")
     public ResponseEntity<AppUserEntity> getaAppUserById(@PathVariable Long userId) {
