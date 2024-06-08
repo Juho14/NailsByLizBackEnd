@@ -12,10 +12,9 @@ public class EmailSender {
 
     public static void sendEmail(String receiverEmail, String title, String emailBody) throws Exception {
 
-        // Credentials from env variables.
         String from = System.getenv("MAILGUN_SMTP_LOGIN");
         String pass = System.getenv("MAILGUN_SMTP_PASSWORD");
-        String host = System.getenv("EMAIL_HOST");
+        String host = System.getenv("MAILGUN_SMTP_SERVER");
         String port = System.getenv("MAILGUN_SMTP_PORT");
         String senderAddress = System.getenv("SENDER_EMAIL_ADDRESS");
 
@@ -24,7 +23,7 @@ public class EmailSender {
         properties.put("mail.smtp.starttls.required", "true");
         properties.put("mail.debug", "true");
         properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.ssl.trust", "mail.kapsi.fi");
+        properties.put("mail.smtp.ssl.trust", host);
         properties.put("mail.smtp.user", from);
         properties.put("mail.smtp.password", pass);
         properties.put("mail.smtp.host", host);
