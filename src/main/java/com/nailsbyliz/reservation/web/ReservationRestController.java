@@ -312,8 +312,15 @@ public class ReservationRestController {
     }
 
     @PutMapping("/{reservationId}")
-    public ResponseEntity<ReservationEntity> updateReservation(@PathVariable Long reservationId,
-            @RequestBody ReservationEntity updatedReservation) {
+    public ResponseEntity<?> updateReservation(@PathVariable Long reservationId,
+            @RequestBody ReservationEntity updatedReservation, HttpServletRequest request) {
+        String token = jwtService.resolveToken(request);
+        boolean valid = jwtService.validateToken(token);
+        String role = jwtService.getRoleFromToken(token);
+
+        if (!valid || !role.equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
         ReservationEntity result = reservationService.updateReservation(reservationId, updatedReservation);
         ReservationEntity originalReservation = reservationService.getReservationById(reservationId);
         if (result != null) {
