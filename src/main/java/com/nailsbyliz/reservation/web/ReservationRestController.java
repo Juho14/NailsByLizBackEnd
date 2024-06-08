@@ -301,7 +301,10 @@ public class ReservationRestController {
     public ResponseEntity<ReservationEntity> newReservation(@RequestBody ReservationEntity reservation) {
         ReservationEntity createdReservation = reservationService.saveReservation(reservation);
         try {
-            EmailSender.sendEmail(createdReservation.getEmail(), "Varausvavhistus, " + reservation.getLName() + , EmailBodyLogic.createNewReservationEmail(createdReservation));
+            EmailSender.sendEmail(createdReservation.getEmail(),
+                    "Varausvavhistus, " + reservation.getLName()
+                            + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
+                    EmailBodyLogic.createNewReservationEmail(createdReservation));
         } catch (Exception ex) {
             System.out.println("Email wasnt sent");
         }
@@ -316,8 +319,8 @@ public class ReservationRestController {
         if (result != null) {
             try {
                 EmailSender.sendEmail(updatedReservation.getEmail(),
-                        "Varausvavhistus, " + updatedReservation.getLName()
-                                + TimeUtil.formatToHelsinkiTime(updatedReservation.getStartTime()),
+                        "Varuksenne tietoja muutettu, " + updatedReservation.getLName()
+                                + TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
                         EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation));
             } catch (Exception ex) {
                 System.out.println("Email wasnt sent");
