@@ -187,5 +187,4 @@ public class ReservationEntity {
                 ", status='" + getStatus() + "'" +
                 "}";
     }
-
 }

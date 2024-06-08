@@ -26,9 +26,12 @@ import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationUserDTO;
+import com.nailsbyliz.reservation.email.EmailBodyLogic;
+import com.nailsbyliz.reservation.email.EmailSender;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
+import com.nailsbyliz.reservation.util.TimeUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -297,6 +300,11 @@ public class ReservationRestController {
     @PostMapping
     public ResponseEntity<ReservationEntity> newReservation(@RequestBody ReservationEntity reservation) {
         ReservationEntity createdReservation = reservationService.saveReservation(reservation);
+        try {
+            EmailSender.sendEmail(createdReservation.getEmail(), "Varausvavhistus, " + reservation.getLName() + , EmailBodyLogic.createNewReservationEmail(createdReservation));
+        } catch (Exception ex) {
+            System.out.println("Email wasnt sent");
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
@@ -304,7 +312,16 @@ public class ReservationRestController {
     public ResponseEntity<ReservationEntity> updateReservation(@PathVariable Long reservationId,
             @RequestBody ReservationEntity updatedReservation) {
         ReservationEntity result = reservationService.updateReservation(reservationId, updatedReservation);
+        ReservationEntity originalReservation = reservationService.getReservationById(reservationId);
         if (result != null) {
+            try {
+                EmailSender.sendEmail(updatedReservation.getEmail(),
+                        "Varausvavhistus, " + updatedReservation.getLName()
+                                + TimeUtil.formatToHelsinkiTime(updatedReservation.getStartTime()),
+                        EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation));
+            } catch (Exception ex) {
+                System.out.println("Email wasnt sent");
+            }
             return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.notFound().build();
