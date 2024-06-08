@@ -19,11 +19,9 @@ public class EmailSender {
         String senderAddress = System.getenv("SENDER_EMAIL_ADDRESS");
 
         Properties properties = System.getProperties();
+        properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.smtp.ssl.protocols", "TLSv1.2");
-        properties.put("mail.smtp.starttls.required", "true");
         properties.put("mail.debug", "true");
-        properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.ssl.trust", host);
         properties.put("mail.smtp.user", from);
         properties.put("mail.smtp.password", pass);
         properties.put("mail.smtp.host", host);
