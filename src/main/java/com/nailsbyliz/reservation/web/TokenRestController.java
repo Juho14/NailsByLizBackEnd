@@ -50,9 +50,7 @@ public class TokenRestController {
         String token = jwtService.resolveToken(request);
         if (!jwtService.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-
         }
-        return ResponseEntity.status(HttpStatus.OK).body((null));
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
-
 }
