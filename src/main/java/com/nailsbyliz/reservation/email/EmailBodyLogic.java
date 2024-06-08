@@ -9,7 +9,6 @@ public class EmailBodyLogic {
         return String.format(
                 "Varauksen tiedot:\n" +
                         "Nimi: %s %s\n" +
-                        "Sähköposti: %s\n" +
                         "Puhelin: %s\n" +
                         "Osoite: %s, %s %s\n" +
                         "Palvelu: %s\n" +
@@ -18,7 +17,6 @@ public class EmailBodyLogic {
                         "Lopetusaika: %s\n" +
                         "Tila: %s\n",
                 reservation.getFName(), reservation.getLName(),
-                reservation.getEmail(),
                 reservation.getPhone(),
                 reservation.getAddress(), reservation.getCity(), reservation.getPostalcode(),
                 reservation.getNailService() != null ? reservation.getNailService().getType() : "Ei määritelty",

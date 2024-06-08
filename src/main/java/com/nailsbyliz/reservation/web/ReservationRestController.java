@@ -302,7 +302,7 @@ public class ReservationRestController {
         ReservationEntity createdReservation = reservationService.saveReservation(reservation);
         try {
             EmailSender.sendEmail(createdReservation.getEmail(),
-                    "Varausvavhistus, " + reservation.getLName()
+                    "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
                             + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
                     EmailBodyLogic.createNewReservationEmail(createdReservation));
         } catch (Exception ex) {
