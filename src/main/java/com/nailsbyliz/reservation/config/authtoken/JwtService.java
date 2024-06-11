@@ -1,3 +1,5 @@
+package com.nailsbyliz.reservation.config.authtoken;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
