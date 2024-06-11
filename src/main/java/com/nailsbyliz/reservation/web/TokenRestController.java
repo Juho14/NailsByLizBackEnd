@@ -46,11 +46,15 @@ public class TokenRestController {
     }
 
     @GetMapping("/api/validate")
-    public ResponseEntity<?> validateToken(HttpServletRequest request) {
-        String token = jwtService.resolveToken(request);
-        if (!jwtService.validateToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+    public ResponseEntity<String> validateToken(HttpServletRequest request) {
+        try {
+            String token = jwtService.resolveToken(request);
+            if (token == null || !jwtService.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+            return ResponseEntity.ok().body("Valid token");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during validation");
         }
-        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 }

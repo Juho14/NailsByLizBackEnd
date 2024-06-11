@@ -1,5 +1,3 @@
-package com.nailsbyliz.reservation.config.authtoken;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,13 +23,17 @@ public class JwtService {
 
     static final long EXPIRATIONTIME = 1000 * 60 * 60 * 24;
     static final String PREFIX = "Bearer";
-    String secretKey = System.getenv("JWT_SECRET_KEY");
+    String secretKey = System.getenv("SECRET_KEY");
     // static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // Key
-    // must be changed in production environment
-    Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    Key key;
 
     @Autowired
     private AppUserRepository repository;
+
+    public JwtService() {
+        // Initialize the key once
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
     // Generates a signed JWT token
     public String getToken(CustomUserDetails userDetails) {
@@ -45,33 +47,28 @@ public class JwtService {
         claims.put("postalcode", userDetails.getPostalcode());
         claims.put("city", userDetails.getCity());
         claims.put("role", userDetails.getRole());
-        String token = Jwts
-                .builder()
+        String token = Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .addClaims(claims)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
-                .signWith(getKey())
+                .signWith(key)
                 .compact();
         return token;
-    }
-
-    private Key getKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     // Gets a token from request Authorization header, verifies a token, gets user
     // details
     public UsernamePasswordAuthenticationToken getAuthUser(HttpServletRequest request) {
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = resolveToken(request);
         try {
             if (token != null) {
                 Claims claims = getClaimsFromToken(token);
 
-                Integer userIdObject = (Integer) claims.get("id");
-                if (userIdObject != null) {
-                    long user_id = userIdObject.longValue();
+                // Directly retrieve the ID as Long
+                Long userId = claims.get("id", Long.class);
+                if (userId != null) {
                     // Fetch user details from the database using the user_id
-                    AppUserEntity userEntity = repository.findById(user_id)
+                    AppUserEntity userEntity = repository.findById(userId)
                             .orElseThrow(() -> new BadCredentialsException("User not found"));
 
                     CustomUserDetails userDetails = new CustomUserDetails(
@@ -88,7 +85,7 @@ public class JwtService {
                             userEntity.getCity(),
                             userEntity.getRole());
 
-                    return new CustomAuthToken(userDetails, null, userDetails.getAuthorities(), user_id);
+                    return new CustomAuthToken(userDetails, null, userDetails.getAuthorities(), userId);
                 } else {
                     System.out.println("User ID not found in claims");
                 }
