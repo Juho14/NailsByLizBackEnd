@@ -28,7 +28,7 @@ public class LoginRestController {
     @Autowired
     AppUserRepository userRepository;
 
-    @PostMapping("/api/login")
+    @PostMapping("/api/public/login")
     public ResponseEntity<?> getToken(@RequestBody AccountCredentialsDTO credentials) {
         UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(credentials.getUsername(),
                 credentials.getPassword());

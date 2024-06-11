@@ -28,7 +28,7 @@ public class TokenRestController {
     @Autowired
     JwtService jwtService;
 
-    @PostMapping("/token")
+    @PostMapping("/api/public/token")
     public String token(Authentication authentication) {
         Instant now = Instant.now();
         long expiry = 36000L;
@@ -45,16 +45,20 @@ public class TokenRestController {
         return this.encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-    @GetMapping("/api/validate")
-    public ResponseEntity<String> validateToken(HttpServletRequest request) {
+    @GetMapping("/api/public/validate")
+    public ResponseEntity<?> validateToken(HttpServletRequest request) {
         try {
             String token = jwtService.resolveToken(request);
-            if (token == null || !jwtService.validateToken(token)) {
+            if (token != null && jwtService.validateToken(token)) {
+                return ResponseEntity.ok().body("Token is valid");
+            } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
             }
-            return ResponseEntity.ok().body("Valid token");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during validation");
+            // Log the exception and return an appropriate response
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }
     }
+
 }

@@ -48,35 +48,19 @@ public class NailServiceRestController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllNailServices(HttpServletRequest request) {
+        String userRole = (String) request.getAttribute("userRole");
         Iterable<NailServiceEntity> services = nailRepo.findAll();
         List<?> response;
 
-        // Extract the JWT token from the request headers
-        String token = jwtService.resolveToken(request);
-
-        // Check if the token is present
-        if (token != null) {
-            // Token is present, validate it
-            if (jwtService.validateToken(token)) {
-                // Token is valid
-                String role = jwtService.getRoleFromToken(token);
-                boolean isAdmin = "ROLE_ADMIN".equals(role);
-
-                if (isAdmin) {
-                    response = mapServiceToAdminDTOs(services);
-                } else {
-                    response = mapServiceToCustomerDTOs(services);
-                }
-
-                return ResponseEntity.ok(response);
-            } else {
-                // Token is invalid, return response indicating invalid token
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-            }
+        // Check if the user is authenticated
+        if ("ROLE_ADMIN".equals(userRole)) {
+            response = mapServiceToAdminDTOs(services);
         } else {
+            // User is not authenticated, return data for regular users
             response = mapServiceToCustomerDTOs(services);
-            return ResponseEntity.ok(response);
         }
+
+        return ResponseEntity.ok(response);
     }
 
     // Method to map Iterable<NailServiceEntity> to List<NailServiceAdminDTO>
@@ -114,34 +98,18 @@ public class NailServiceRestController {
 
     // To show a specific service
     @GetMapping("/{serviceId}")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<?> getServiceById(@PathVariable Long serviceId, HttpServletRequest request) {
         List<Long> ids = Collections.singletonList(serviceId);
         Iterable<NailServiceEntity> service = nailRepo.findAllById(ids);
-
+        String userRole = (String) request.getAttribute("userRole");
         List<?> response;
 
-        // Extract the JWT token from the request headers
-        String token = jwtService.resolveToken(request);
-
         // Check if the token is present
-        if (token != null) {
-            // Token is present, validate it
-            if (jwtService.validateToken(token)) {
-                // Token is valid
-                String role = jwtService.getRoleFromToken(token);
-                boolean isAdmin = "ROLE_ADMIN".equals(role);
-
-                if (isAdmin) {
-                    response = mapServiceToAdminDTOs(service);
-                } else {
-                    response = mapServiceToCustomerDTOs(service);
-                }
-
-                return ResponseEntity.ok(response);
-            } else {
-                // Token is invalid, return response indicating invalid token
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-            }
+        // Token is present, validate it
+        if ("ROLE_ADMIN".equals(userRole)) {
+            response = mapServiceToAdminDTOs(service);
+            return ResponseEntity.ok(response);
         } else {
             response = mapServiceToCustomerDTOs(service);
             return ResponseEntity.ok(response);
@@ -150,6 +118,7 @@ public class NailServiceRestController {
 
     // Create a new type of service
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NailServiceEntity> newNailSerEntity(@RequestBody NailServiceEntity newService) {
         NailServiceEntity createdNailServiceEntity = nailService.saveNailServiceEntity(newService);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNailServiceEntity);
@@ -157,6 +126,7 @@ public class NailServiceRestController {
 
     // Edit existing services
     @PutMapping("/{serviceId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NailServiceEntity> updateNailServicEntity(@PathVariable Long serviceId,
             @RequestBody NailServiceEntity updatedNailService) {
         NailServiceEntity result = nailService.updateNailServiceEntity(serviceId, updatedNailService);

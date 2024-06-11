@@ -98,11 +98,10 @@ public class AppUserRestController {
 
     // Delete a specific
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteAppUser(@RequestHeader("Authorization") String token, @PathVariable Long userId) {
-        String role = jwtService.getRoleFromToken(token);
-        boolean isAdmin = "ROLE_ADMIN".equals(role);
+    public ResponseEntity<Void> deleteAppUser(HttpServletRequest request, @PathVariable Long userId) {
+        String userRole = (String) request.getAttribute("userRole");
 
-        if (jwtService.validateToken(token) && isAdmin) {
+        if ("ROLE_ADMIN".equals(userRole)) {
             Optional<AppUserEntity> deletedUserOptional = userRepo.findById(userId);
             AppUserEntity deletedUser = null;
             String deletedUserRole = "";
@@ -134,11 +133,12 @@ public class AppUserRestController {
     @PutMapping("/password")
     public ResponseEntity<?> updatePassword(@RequestBody AppUserEntity updatedUser,
             HttpServletRequest request) {
-        String token = jwtService.resolveToken(request);
-        if (!jwtService.validateToken(token)) {
+
+        Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
-        Long userId = jwtService.getIdFromToken(token);
+
         if (userId != updatedUser.getId()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid ID");
         }
