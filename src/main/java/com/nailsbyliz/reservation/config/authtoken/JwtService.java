@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,15 +18,20 @@ import com.nailsbyliz.reservation.domain.AppUserEntity;
 import com.nailsbyliz.reservation.repositories.AppUserRepository;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 public class JwtService {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
     static final long EXPIRATIONTIME = 1000 * 60 * 60 * 24;
-    // static final long EXPIRATIONTIME = 2000; // 5 seconds for development
+    // static final long EXPIRATIONTIME = 120000; // 4 seconds for development
     static final String PREFIX = "Bearer";
     static final String secretKey = System.getenv("JWT_SECRET_KEY");
 
@@ -34,8 +41,7 @@ public class JwtService {
     private AppUserRepository repository;
 
     public JwtService() {
-        // this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256); for dev purposes
-        // Initialize the key once
+        // this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
@@ -50,13 +56,13 @@ public class JwtService {
         claims.put("postalcode", userDetails.getPostalcode());
         claims.put("city", userDetails.getCity());
         claims.put("role", userDetails.getRole());
-        String token = Jwts.builder()
+
+        return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .addClaims(claims)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                 .signWith(key)
                 .compact();
-        return token;
     }
 
     public UsernamePasswordAuthenticationToken getAuthUser(HttpServletRequest request) {
@@ -83,11 +89,15 @@ public class JwtService {
                             userEntity.getRole());
                     return new CustomAuthToken(userDetails, null, userDetails.getAuthorities(), userId);
                 } else {
-                    System.out.println("User ID not found in claims");
+                    logger.error("User ID not found in claims");
                 }
             }
             return null;
+        } catch (ExpiredJwtException e) {
+            logger.error("Token has expired", e);
+            throw new ExpiredJwtException(null, null, token);
         } catch (Exception e) {
+            logger.error("Invalid token", e);
             throw new BadCredentialsException("Invalid token", e);
         }
     }
@@ -104,18 +114,31 @@ public class JwtService {
     private Claims getClaimsFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
+                .setAllowedClockSkewSeconds(60) // Allow 60 seconds of clock skew
                 .build()
-                .parseClaimsJws(token.replace(PREFIX, ""))
+                .parseClaimsJws(token.replace(PREFIX, "").trim())
                 .getBody();
     }
 
-    public boolean validateToken(String token) throws Exception {
+    public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token.replace(PREFIX, ""));
+            Jwts.parserBuilder().setSigningKey(key).setAllowedClockSkewSeconds(1).build()
+                    .parseClaimsJws(token.replace(PREFIX, "").trim());
             return true;
+        } catch (ExpiredJwtException e) {
+            logger.error("Token has expired", e);
+        } catch (MalformedJwtException e) {
+            logger.error("Invalid token format", e);
+        } catch (UnsupportedJwtException e) {
+            logger.error("Unsupported token", e);
+        } catch (SignatureException e) {
+            logger.error("Invalid token signature", e);
+        } catch (IllegalArgumentException e) {
+            logger.error("Token is empty or null", e);
         } catch (Exception e) {
-            throw e;
+            logger.error("Token validation failed", e);
         }
+        return false;
     }
 
     public String resolveToken(HttpServletRequest request) {

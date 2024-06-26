@@ -1,8 +1,8 @@
 package com.nailsbyliz.reservation.web;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,7 +48,11 @@ public class NailServiceRestController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllNailServices(HttpServletRequest request) {
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
+        }
         Iterable<NailServiceEntity> services = nailRepo.findAll();
         List<?> response;
 
@@ -96,24 +100,53 @@ public class NailServiceRestController {
         return dtos;
     }
 
-    // To show a specific service
+    // To fetch a specific service
     @GetMapping("/{serviceId}")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getServiceById(@PathVariable Long serviceId, HttpServletRequest request) {
-        List<Long> ids = Collections.singletonList(serviceId);
-        Iterable<NailServiceEntity> service = nailRepo.findAllById(ids);
+        Optional<NailServiceEntity> service = nailRepo.findById(serviceId);
         String userRole = (String) request.getAttribute("userRole");
-        List<?> response;
 
-        // Check if the token is present
-        // Token is present, validate it
-        if ("ROLE_ADMIN".equals(userRole)) {
-            response = mapServiceToAdminDTOs(service);
+        if (service.isPresent()) {
+            Object response;
+
+            // Check if the token is present
+            // Token is present, validate it
+            if ("ROLE_ADMIN".equals(userRole)) {
+                response = mapToAdminDTO(service.get());
+            } else {
+                response = mapToCustomerDTO(service.get());
+            }
+
             return ResponseEntity.ok(response);
         } else {
-            response = mapServiceToCustomerDTOs(service);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.notFound().build();
         }
+    }
+
+    // Singular service DTOs
+    private NailServiceAdminDTO mapToAdminDTO(NailServiceEntity service) {
+        NailServiceAdminDTO dto = new NailServiceAdminDTO();
+        dto.setId(service.getId());
+        dto.setType(service.getType());
+        dto.setDuration(service.getDuration());
+        dto.setPrice(service.getPrice());
+        dto.setAdminService(service.isAdminService());
+        return dto;
+    }
+
+    private NailServiceCustomerDTO mapToCustomerDTO(NailServiceEntity service) {
+        // Skip admin-only services
+        if (service.isAdminService()) {
+            return null; // or handle accordingly
+        }
+
+        NailServiceCustomerDTO dto = new NailServiceCustomerDTO();
+        dto.setId(service.getId());
+        dto.setType(service.getType());
+        dto.setDuration(service.getDuration());
+        dto.setPrice(service.getPrice());
+        return dto;
     }
 
     // Create a new type of service

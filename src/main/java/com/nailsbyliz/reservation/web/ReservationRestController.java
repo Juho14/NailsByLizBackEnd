@@ -63,7 +63,8 @@ public class ReservationRestController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllReservations(HttpServletRequest request) {
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
 
         Iterable<ReservationEntity> reservations;
         List<?> response;

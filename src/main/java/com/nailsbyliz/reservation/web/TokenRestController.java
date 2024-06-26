@@ -1,11 +1,16 @@
 package com.nailsbyliz.reservation.web;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -17,18 +22,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.config.authtoken.JwtService;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 public class TokenRestController {
 
-    @Autowired
-    JwtEncoder encoder;
+    private static final Logger logger = LoggerFactory.getLogger(TokenRestController.class);
 
     @Autowired
-    JwtService jwtService;
+    private JwtEncoder encoder;
+
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/api/public/token")
+    @PreAuthorize("permitAll()")
     public String token(Authentication authentication) {
         Instant now = Instant.now();
         long expiry = 36000L;
@@ -46,19 +55,29 @@ public class TokenRestController {
     }
 
     @GetMapping("/api/public/validate")
-    public ResponseEntity<?> validateToken(HttpServletRequest request) {
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Map<String, String>> validateToken(HttpServletRequest request) {
+        String token = jwtService.resolveToken(request);
+        Map<String, String> response = new HashMap<>();
         try {
-            String token = jwtService.resolveToken(request);
-            if (token != null && jwtService.validateToken(token)) {
-                return ResponseEntity.ok().body("Token is valid");
+            boolean isValid = jwtService.validateToken(token);
+            if (isValid) {
+                response.put("status", "valid");
+                response.put("message", "Token is valid");
+                return ResponseEntity.ok().body(response);
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+                response.put("status", "unauthorized");
+                response.put("message", "Invalid token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
+        } catch (ExpiredJwtException e) {
+            response.put("status", "expired");
+            response.put("message", "Token has expired");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (Exception e) {
-            // Log the exception and return an appropriate response
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+            response.put("status", "error");
+            response.put("message", "Token validation failed");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 }
