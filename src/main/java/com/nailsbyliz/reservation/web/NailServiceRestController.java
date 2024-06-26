@@ -105,7 +105,8 @@ public class NailServiceRestController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getServiceById(@PathVariable Long serviceId, HttpServletRequest request) {
         Optional<NailServiceEntity> service = nailRepo.findById(serviceId);
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
 
         if (service.isPresent()) {
             Object response;
