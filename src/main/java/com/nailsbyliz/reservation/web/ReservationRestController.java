@@ -98,7 +98,8 @@ public class ReservationRestController {
 
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<?> getReservationsForUser(HttpServletRequest request, @PathVariable Long customerId) {
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
 
         if (!"ROLE_ADMIN".equals(userRole)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
@@ -205,7 +206,8 @@ public class ReservationRestController {
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
             HttpServletRequest request) {
 
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
 
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
@@ -227,7 +229,8 @@ public class ReservationRestController {
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
             HttpServletRequest request) {
 
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
 
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
@@ -262,7 +265,8 @@ public class ReservationRestController {
     public ResponseEntity<?> updateReservation(@PathVariable Long reservationId,
             @RequestBody ReservationEntity updatedReservation, HttpServletRequest request) {
 
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
 
         if (!userRole.equals("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
@@ -325,7 +329,8 @@ public class ReservationRestController {
 
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<?> deleteReservation(HttpServletRequest request, @PathVariable Long reservationId) {
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
         if (!userRole.equals("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
