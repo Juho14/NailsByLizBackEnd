@@ -207,8 +207,10 @@ public class ReservationRestController {
             HttpServletRequest request) {
 
         String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
-
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
+        }
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
             Iterable<ReservationEntity> reservations = reservationService.getReservationsByDay(day);
@@ -230,8 +232,10 @@ public class ReservationRestController {
             HttpServletRequest request) {
 
         String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
-
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
+        }
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
             Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
