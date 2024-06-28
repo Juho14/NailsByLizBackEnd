@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -83,15 +84,15 @@ public class TokenRestController {
 
     @PostMapping("/api/public/refresh")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String token = jwtService.resolveToken(request);
         Map<String, String> response = new HashMap<>();
         try {
             String newToken = jwtService.refreshToken(token);
-            response.put("status", "success");
-            response.put("message", "Token refreshed successfully");
-            response.put("token", newToken);
-            return ResponseEntity.ok().body(response);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + newToken)
+                    .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
+                    .body(response);
         } catch (ExpiredJwtException e) {
             response.put("status", "expired");
             response.put("message", "Token has expired and cannot be refreshed");
@@ -102,4 +103,5 @@ public class TokenRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 }
