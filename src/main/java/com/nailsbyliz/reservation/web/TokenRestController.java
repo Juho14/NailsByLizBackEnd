@@ -80,4 +80,26 @@ public class TokenRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PostMapping("/api/public/refresh")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
+        String token = jwtService.resolveToken(request);
+        Map<String, String> response = new HashMap<>();
+        try {
+            String newToken = jwtService.refreshToken(token);
+            response.put("status", "success");
+            response.put("message", "Token refreshed successfully");
+            response.put("token", newToken);
+            return ResponseEntity.ok().body(response);
+        } catch (ExpiredJwtException e) {
+            response.put("status", "expired");
+            response.put("message", "Token has expired and cannot be refreshed");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "Token refresh failed");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }

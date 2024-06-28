@@ -65,6 +65,23 @@ public class JwtService {
                 .compact();
     }
 
+    public String refreshToken(String token) {
+        try {
+            Claims claims = getClaimsFromToken(token);
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
+                    .signWith(key)
+                    .compact();
+        } catch (ExpiredJwtException e) {
+            logger.error("Token has expired and cannot be refreshed", e);
+            throw new BadCredentialsException("Token has expired and cannot be refreshed", e);
+        } catch (Exception e) {
+            logger.error("Failed to refresh token", e);
+            throw new BadCredentialsException("Failed to refresh token", e);
+        }
+    }
+
     public UsernamePasswordAuthenticationToken getAuthUser(HttpServletRequest request) {
         String token = resolveToken(request);
         try {
