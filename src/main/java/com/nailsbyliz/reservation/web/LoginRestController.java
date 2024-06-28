@@ -34,12 +34,17 @@ public class LoginRestController {
                 credentials.getPassword());
         Authentication auth = authManager.authenticate(creds);
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-        String jwts = jwtService.getToken(userDetails);
+
+        // Generate authentication token
+        String authToken = jwtService.generateAuthToken(userDetails);
+
+        // Generate access token
+        String accessToken = jwtService.generateAccessToken(userDetails);
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
-                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
+                .header("Access-Token", "Bearer " + accessToken)
+                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization, Access-Token")
                 .build();
-
     }
-
 }

@@ -31,11 +31,12 @@ public class JwtService {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
     static final long EXPIRATIONTIME = 1000 * 60 * 60 * 24;
-    // static final long EXPIRATIONTIME = 120000; // 4 seconds for development
+    static final long AUTH_TOKEN_EXPIRATION = 1000 * 60 * 10; // 10 minutes
+    static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
     static final String PREFIX = "Bearer";
     static final String secretKey = System.getenv("JWT_SECRET_KEY");
 
-    Key key;
+    private final Key key;
 
     @Autowired
     private AppUserRepository repository;
@@ -43,6 +44,39 @@ public class JwtService {
     public JwtService() {
         // this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
+    public String generateAuthToken(CustomUserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", userDetails.getId());
+        claims.put("fname", userDetails.getFname());
+        claims.put("lname", userDetails.getLname());
+        claims.put("phone", userDetails.getPhone());
+        claims.put("email", userDetails.getEmail());
+        claims.put("address", userDetails.getAddress());
+        claims.put("postalcode", userDetails.getPostalcode());
+        claims.put("city", userDetails.getCity());
+        claims.put("role", userDetails.getRole());
+
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .addClaims(claims)
+                .setExpiration(new Date(System.currentTimeMillis() + AUTH_TOKEN_EXPIRATION))
+                .signWith(key)
+                .compact();
+    }
+
+    public String generateAccessToken(CustomUserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", userDetails.getId());
+        claims.put("role", userDetails.getRole());
+
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .addClaims(claims)
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(key)
+                .compact();
     }
 
     public String getToken(CustomUserDetails userDetails) {
@@ -68,10 +102,21 @@ public class JwtService {
     public String refreshToken(String token) {
         try {
             Claims claims = getClaimsFromToken(token);
-            return Jwts.builder()
+            String newAuthToken = Jwts.builder()
                     .setClaims(claims)
-                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
+                    .setExpiration(new Date(System.currentTimeMillis() + AUTH_TOKEN_EXPIRATION))
                     .signWith(key)
+                    .compact();
+
+            String newAccessToken = Jwts.builder()
+                    .setClaims(claims)
+                    .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                    .signWith(key)
+                    .compact();
+
+            return Jwts.builder()
+                    .claim("authToken", newAuthToken)
+                    .claim("accessToken", newAccessToken)
                     .compact();
         } catch (ExpiredJwtException e) {
             logger.error("Token has expired and cannot be refreshed", e);
