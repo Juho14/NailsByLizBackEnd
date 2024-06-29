@@ -83,11 +83,11 @@ public class ReservationRestController {
     @GetMapping("/myreservations")
     public ResponseEntity<?> getReservationsForUser(HttpServletRequest request) {
         // Extract the user ID from the request attribute set by the interceptor
-        Long customerId = (Long) request.getAttribute("userId");
-
+        String token = jwtService.resolveAuthToken(request);
+        Long currUserId = jwtService.getIdFromAuthToken(token);
         // Check if the customer ID is not null
-        if (customerId != null) {
-            Iterable<ReservationEntity> reservations = reservationRepository.findByCustomerId(customerId);
+        if (currUserId != null) {
+            Iterable<ReservationEntity> reservations = reservationRepository.findByCustomerId(currUserId);
             List<?> response = mapToUserDTOs(reservations);
             return ResponseEntity.ok(response);
         } else {
