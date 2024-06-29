@@ -63,8 +63,8 @@ public class ReservationRestController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllReservations(HttpServletRequest request) {
-        String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String token = jwtService.resolveAuthToken(request);
+        String userRole = jwtService.getRoleFromAuthToken(token);
 
         Iterable<ReservationEntity> reservations;
         List<?> response;
@@ -98,8 +98,8 @@ public class ReservationRestController {
 
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<?> getReservationsForUser(HttpServletRequest request, @PathVariable Long customerId) {
-        String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String token = jwtService.resolveAuthToken(request);
+        String userRole = jwtService.getRoleFromAuthToken(token);
 
         if (!"ROLE_ADMIN".equals(userRole)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
@@ -206,8 +206,8 @@ public class ReservationRestController {
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
             HttpServletRequest request) {
 
-        String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String token = jwtService.resolveAuthToken(request);
+        String userRole = jwtService.getRoleFromAuthToken(token);
 
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
@@ -228,10 +228,14 @@ public class ReservationRestController {
     public ResponseEntity<?> getReservationsByWeek(
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
             HttpServletRequest request) {
-
-        String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
-
+        String userRole = "";
+        String token = jwtService.resolveAuthToken(request);
+        if (token != null) {
+            userRole = jwtService.getRoleFromAuthToken(token);
+            System.out.println("Role: " + userRole);
+        } else {
+            System.out.println("Token is null?");
+        }
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
             Iterable<ReservationEntity> reservations = reservationService.getReservationsForWeek(day);
@@ -265,8 +269,8 @@ public class ReservationRestController {
     public ResponseEntity<?> updateReservation(@PathVariable Long reservationId,
             @RequestBody ReservationEntity updatedReservation, HttpServletRequest request) {
 
-        String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String token = jwtService.resolveAuthToken(request);
+        String userRole = jwtService.getRoleFromAuthToken(token);
 
         if (!userRole.equals("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
@@ -329,8 +333,8 @@ public class ReservationRestController {
 
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<?> deleteReservation(HttpServletRequest request, @PathVariable Long reservationId) {
-        String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String token = jwtService.resolveAuthToken(request);
+        String userRole = jwtService.getRoleFromAuthToken(token);
         if (!userRole.equals("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }

@@ -40,6 +40,7 @@ public class NailServiceImpl implements NailService {
             existingNailService.setType(updatedNailService.getType());
             existingNailService.setDuration(updatedNailService.getDuration());
             existingNailService.setPrice(updatedNailService.getPrice());
+            existingNailService.setDescription(updatedNailService.getDescription());
             existingNailService.setAdminService(updatedNailService.getAdminService());
             return saveNailServiceEntity(existingNailService);
         } else {

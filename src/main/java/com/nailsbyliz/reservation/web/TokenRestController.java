@@ -63,13 +63,13 @@ public class TokenRestController {
     @GetMapping("/api/public/validate")
     @PreAuthorize("permitAll()")
     public ResponseEntity<Map<String, String>> validateToken(HttpServletRequest request) {
-        String token = jwtService.resolveToken(request);
+        String accessToken = jwtService.resolveAccessToken(request);
         Map<String, String> response = new HashMap<>();
+
         try {
-            boolean isValid = jwtService.validateToken(token);
-            if (isValid) {
+            if (accessToken != null && jwtService.validateToken(accessToken)) {
                 response.put("status", "valid");
-                response.put("message", "Token is valid");
+                response.put("message", "Access token is valid");
                 return ResponseEntity.ok().body(response);
             } else {
                 response.put("status", "unauthorized");
@@ -90,11 +90,12 @@ public class TokenRestController {
     @PostMapping("/api/public/refresh")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-        String token = jwtService.resolveToken(request);
+        String accessToken = jwtService.resolveAccessToken(request);
         Map<String, String> response = new HashMap<>();
+
         try {
-            if (token != null && jwtService.validateToken(token)) {
-                Long userId = jwtService.getIdFromToken(token); // Extract user ID from token
+            if (accessToken != null && jwtService.validateToken(accessToken)) {
+                Long userId = jwtService.getIdFromAccessToken(accessToken); // Extract user ID from token
                 Optional<AppUserEntity> userOptional = userRepository.findById(userId);
                 if (userOptional.isPresent()) {
                     AppUserEntity userEntity = userOptional.get();

@@ -8,7 +8,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -30,12 +29,11 @@ import jakarta.servlet.http.HttpServletRequest;
 public class JwtService {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
-    static final long EXPIRATIONTIME = 1000 * 60 * 60 * 24;
     static final long AUTH_TOKEN_EXPIRATION = 1000 * 60 * 10; // 10 minutes
     static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
     static final String PREFIX = "Bearer";
-    static final String secretKey = System.getenv("JWT_SECRET_KEY");
-
+    // static final String secretKey = System.getenv("JWT_SECRET_KEY");
+    static final String secretKey = "Renatemeoweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeelöaksjdflajflk";
     private final Key key;
 
     @Autowired
@@ -44,6 +42,43 @@ public class JwtService {
     public JwtService() {
         // this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
+    public UsernamePasswordAuthenticationToken getAuthUser(HttpServletRequest request) {
+        String token = resolveAccessToken(request);
+        try {
+            if (token != null && validateToken(token)) {
+                Claims claims = getClaimsFromToken(token);
+                Long userId = claims.get("id", Long.class);
+                if (userId != null) {
+                    AppUserEntity userEntity = repository.findById(userId)
+                            .orElseThrow(() -> new BadCredentialsException("User not found"));
+                    CustomUserDetails userDetails = new CustomUserDetails(
+                            userEntity.getUsername(),
+                            userEntity.getPasswordHash(),
+                            AuthorityUtils.createAuthorityList(userEntity.getRole()),
+                            userEntity.getId(),
+                            userEntity.getFName(),
+                            userEntity.getLName(),
+                            userEntity.getPhone(),
+                            userEntity.getEmail(),
+                            userEntity.getAddress(),
+                            userEntity.getPostalcode(),
+                            userEntity.getCity(),
+                            userEntity.getRole());
+                    return new CustomAuthToken(userDetails, null, userDetails.getAuthorities(), userId);
+                } else {
+                    logger.error("User ID not found in claims");
+                }
+            }
+            return null;
+        } catch (ExpiredJwtException e) {
+            logger.error("Token has expired", e);
+            throw new ExpiredJwtException(null, null, token);
+        } catch (Exception e) {
+            logger.error("Invalid token", e);
+            throw new BadCredentialsException("Invalid token", e);
+        }
     }
 
     public String generateAuthToken(CustomUserDetails userDetails) {
@@ -79,113 +114,26 @@ public class JwtService {
                 .compact();
     }
 
-    public String getToken(CustomUserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", userDetails.getId());
-        claims.put("fname", userDetails.getFname());
-        claims.put("lname", userDetails.getLname());
-        claims.put("phone", userDetails.getPhone());
-        claims.put("email", userDetails.getEmail());
-        claims.put("address", userDetails.getAddress());
-        claims.put("postalcode", userDetails.getPostalcode());
-        claims.put("city", userDetails.getCity());
-        claims.put("role", userDetails.getRole());
-
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .addClaims(claims)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
-                .signWith(key)
-                .compact();
-    }
-
-    public String refreshToken(String token) {
-        try {
-            Claims claims = getClaimsFromToken(token);
-            String newAuthToken = Jwts.builder()
-                    .setClaims(claims)
-                    .setExpiration(new Date(System.currentTimeMillis() + AUTH_TOKEN_EXPIRATION))
-                    .signWith(key)
-                    .compact();
-
-            String newAccessToken = Jwts.builder()
-                    .setClaims(claims)
-                    .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                    .signWith(key)
-                    .compact();
-
-            return Jwts.builder()
-                    .claim("authToken", newAuthToken)
-                    .claim("accessToken", newAccessToken)
-                    .compact();
-        } catch (ExpiredJwtException e) {
-            logger.error("Token has expired and cannot be refreshed", e);
-            throw new BadCredentialsException("Token has expired and cannot be refreshed", e);
-        } catch (Exception e) {
-            logger.error("Failed to refresh token", e);
-            throw new BadCredentialsException("Failed to refresh token", e);
+    public String resolveAccessToken(HttpServletRequest request) {
+        String token = request.getHeader("Access-Token");
+        if (token != null && token.startsWith(PREFIX)) {
+            return token.substring(PREFIX.length()).trim();
         }
+        return null;
     }
 
-    public UsernamePasswordAuthenticationToken getAuthUser(HttpServletRequest request) {
-        String token = resolveToken(request);
-        try {
-            if (token != null) {
-                Claims claims = getClaimsFromToken(token);
-                Long userId = claims.get("id", Long.class);
-                if (userId != null) {
-                    AppUserEntity userEntity = repository.findById(userId)
-                            .orElseThrow(() -> new BadCredentialsException("User not found"));
-                    CustomUserDetails userDetails = new CustomUserDetails(
-                            userEntity.getUsername(),
-                            userEntity.getPasswordHash(),
-                            AuthorityUtils.createAuthorityList(userEntity.getRole()),
-                            userEntity.getId(),
-                            userEntity.getFName(),
-                            userEntity.getLName(),
-                            userEntity.getPhone(),
-                            userEntity.getEmail(),
-                            userEntity.getAddress(),
-                            userEntity.getPostalcode(),
-                            userEntity.getCity(),
-                            userEntity.getRole());
-                    return new CustomAuthToken(userDetails, null, userDetails.getAuthorities(), userId);
-                } else {
-                    logger.error("User ID not found in claims");
-                }
-            }
-            return null;
-        } catch (ExpiredJwtException e) {
-            logger.error("Token has expired", e);
-            throw new ExpiredJwtException(null, null, token);
-        } catch (Exception e) {
-            logger.error("Invalid token", e);
-            throw new BadCredentialsException("Invalid token", e);
+    public String resolveAuthToken(HttpServletRequest request) {
+        String token = request.getHeader("Auth-Token");
+        if (token != null && token.startsWith(PREFIX)) {
+            return token.substring(PREFIX.length()).trim();
         }
-    }
-
-    public Long getIdFromToken(String token) {
-        Claims claims = getClaimsFromToken(token);
-        Integer userIdObject = (Integer) claims.get("id");
-        if (userIdObject != null) {
-            return userIdObject.longValue();
-        }
-        throw new BadCredentialsException("User ID not found in token");
-    }
-
-    private Claims getClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .setAllowedClockSkewSeconds(60) // Allow 60 seconds of clock skew
-                .build()
-                .parseClaimsJws(token.replace(PREFIX, "").trim())
-                .getBody();
+        return null;
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).setAllowedClockSkewSeconds(1).build()
-                    .parseClaimsJws(token.replace(PREFIX, "").trim());
+            Jwts.parserBuilder().setSigningKey(key).setAllowedClockSkewSeconds(60).build()
+                    .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
             logger.error("Token has expired", e);
@@ -203,16 +151,32 @@ public class JwtService {
         return false;
     }
 
-    public String resolveToken(HttpServletRequest request) {
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (token != null && token.startsWith(PREFIX)) {
-            return token.substring(PREFIX.length()).trim();
-        }
-        return null;
+    public Long getIdFromAccessToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        return claims.get("id", Long.class);
     }
 
-    public String getRoleFromToken(String token) {
+    public Long getIdFromAuthToken(String token) {
         Claims claims = getClaimsFromToken(token);
-        return (String) claims.get("role");
+        return claims.get("id", Long.class);
+    }
+
+    public String getRoleFromAccessToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        return claims.get("role", String.class);
+    }
+
+    public String getRoleFromAuthToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        return claims.get("role", String.class);
+    }
+
+    private Claims getClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .setAllowedClockSkewSeconds(60)
+                .build()
+                .parseClaimsJws(token.replace(PREFIX, "").trim())
+                .getBody();
     }
 }

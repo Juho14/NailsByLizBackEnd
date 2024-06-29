@@ -91,7 +91,7 @@ public class AppUserRestController {
     // Delete a user
     @DeleteMapping
     public ResponseEntity<Void> deleteAppUser(@RequestHeader("Authorization") String token) {
-        Long userId = jwtService.getIdFromToken(token);
+        Long userId = jwtService.getIdFromAuthToken(token);
         boolean deleted = userService.deleteUser(userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }

@@ -21,40 +21,37 @@ public class TokenValidationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
+        if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
+
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
 
-        // Check if the method has the @PreAuthorize("permitAll()") annotation
         if (method.isAnnotationPresent(PreAuthorize.class)) {
             PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
             if (preAuthorize.value().equals("permitAll()")) {
-                // Allow access to endpoints with permitAll() without authentication
                 return true;
             }
         }
 
-        String token = jwtService.resolveToken(request);
-        if (token != null) {
-            if (jwtService.validateToken(token)) {
-                // Token is valid
-                Long userId = jwtService.getIdFromToken(token);
-                request.setAttribute("userId", userId);
-                String role = jwtService.getRoleFromToken(token);
-                request.setAttribute("userRole", role);
-                return true;
-            } else {
-                // Token is invalid
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
-                return false;
-            }
-        } else {
-            // Token is not present
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not provided");
-            return false;
+        String accessToken = jwtService.resolveAccessToken(request);
+        if (accessToken != null && jwtService.validateToken(accessToken)) {
+            setRequestAttributes(request, accessToken, jwtService);
         }
+
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not provided or invalid");
+        return false;
     }
 
-    // Implementing other methods of HandlerInterceptor if needed
+    private void setRequestAttributes(HttpServletRequest request, String token, JwtService jwtService) {
+        Long userId = jwtService.getIdFromAccessToken(token);
+        request.setAttribute("userId", userId);
+        String role = jwtService.getRoleFromAccessToken(token);
+        request.setAttribute("role", role);
+        System.out.println(role);
+    }
+
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
             ModelAndView modelAndView) throws Exception {
