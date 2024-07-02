@@ -25,7 +25,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/reservationsettings")
-// @PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class ReservationSettingsRestController {
 
     @Autowired
@@ -78,8 +78,8 @@ public class ReservationSettingsRestController {
     @PostMapping
     public ResponseEntity<ReservationSettings> createReservationSettings(
             @RequestBody ReservationSettings reservationSettings, HttpServletRequest request) {
-        String token = jwtService.resolveAuthToken(request);
-        String userRole = jwtService.getRoleFromAuthToken(token);
+        String token = jwtService.resolveAccessToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
         System.out.println("Token: " + token);
         System.out.println("User Role: " + userRole);
 

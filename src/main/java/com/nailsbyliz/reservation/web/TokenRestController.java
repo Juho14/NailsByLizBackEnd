@@ -28,6 +28,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
+@PreAuthorize("permitAll()")
 public class TokenRestController {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenRestController.class);
@@ -42,7 +43,6 @@ public class TokenRestController {
     AppUserRepository userRepository;
 
     @PostMapping("/api/public/token")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<?> generateAuthToken(HttpServletRequest request) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -61,7 +61,6 @@ public class TokenRestController {
     }
 
     @GetMapping("/api/public/validate")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<Map<String, String>> validateToken(HttpServletRequest request) {
         String accessToken = jwtService.resolveAccessToken(request);
         Map<String, String> response = new HashMap<>();
@@ -88,14 +87,13 @@ public class TokenRestController {
     }
 
     @PostMapping("/api/public/refresh")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String accessToken = jwtService.resolveAccessToken(request);
         Map<String, String> response = new HashMap<>();
 
         try {
             if (accessToken != null && jwtService.validateToken(accessToken)) {
-                Long userId = jwtService.getIdFromAccessToken(accessToken); // Extract user ID from token
+                Long userId = jwtService.getIdFromToken(accessToken); // Extract user ID from token
                 Optional<AppUserEntity> userOptional = userRepository.findById(userId);
                 if (userOptional.isPresent()) {
                     AppUserEntity userEntity = userOptional.get();

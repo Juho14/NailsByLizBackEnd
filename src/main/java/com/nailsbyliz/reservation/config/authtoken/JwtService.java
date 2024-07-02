@@ -32,9 +32,8 @@ public class JwtService {
     static final long AUTH_TOKEN_EXPIRATION = 1000 * 60 * 10; // 10 minutes
     static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
     static final String PREFIX = "Bearer";
-    static final String secretKey = System.getenv("JWT_SECRET_KEY");
-    // static final String secretKey =
-    // "Renatemeoweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeelöaksjdflajflk";
+    // static final String secretKey = System.getenv("JWT_SECRET_KEY");
+    static final String secretKey = "Renatemeoweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeelöaksjdflajflk";
     private final Key key;
 
     @Autowired
@@ -152,22 +151,12 @@ public class JwtService {
         return false;
     }
 
-    public Long getIdFromAccessToken(String token) {
+    public Long getIdFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.get("id", Long.class);
     }
 
-    public Long getIdFromAuthToken(String token) {
-        Claims claims = getClaimsFromToken(token);
-        return claims.get("id", Long.class);
-    }
-
-    public String getRoleFromAccessToken(String token) {
-        Claims claims = getClaimsFromToken(token);
-        return claims.get("role", String.class);
-    }
-
-    public String getRoleFromAuthToken(String token) {
+    public String getRoleFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.get("role", String.class);
     }

@@ -3,6 +3,7 @@ package com.nailsbyliz.reservation.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import com.nailsbyliz.reservation.repositories.AppUserRepository;
 
 @CrossOrigin
 @RestController
+@PreAuthorize("permitAll()")
 public class LoginRestController {
     @Autowired
     private JwtService jwtService;
@@ -29,6 +31,7 @@ public class LoginRestController {
     AppUserRepository userRepository;
 
     @PostMapping("/api/public/login")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<?> getToken(@RequestBody AccountCredentialsDTO credentials) {
         UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(credentials.getUsername(),
                 credentials.getPassword());

@@ -58,6 +58,9 @@ public class WebSecurityConfig {
                          * .requestMatchers(antMatcher("/api/reservationsettings/active")).permitAll()
                          * .requestMatchers(antMatcher("/api/login")).permitAll()
                          */
+                        // .requestMatchers(antMatcher("/api/public/**")).permitAll()
+                        // .anyRequest().hasRole("ADMIN"))
+
                         .requestMatchers(antMatcher("/**")).permitAll()
                         .anyRequest().authenticated())
 
