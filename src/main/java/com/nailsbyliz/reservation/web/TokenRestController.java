@@ -4,17 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,34 +26,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @PreAuthorize("permitAll()")
 public class TokenRestController {
 
-    private static final Logger logger = LoggerFactory.getLogger(TokenRestController.class);
-
-    @Autowired
-    private JwtEncoder encoder;
-
     @Autowired
     private JwtService jwtService;
 
     @Autowired
     AppUserRepository userRepository;
-
-    @PostMapping("/api/public/token")
-    public ResponseEntity<?> generateAuthToken(HttpServletRequest request) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-            String authToken = jwtService.generateAuthToken(userDetails); // Generate auth token
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
-                    .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.AUTHORIZATION)
-                    .build();
-        } catch (Exception e) {
-            logger.error("Failed to generate authentication token", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 
     @GetMapping("/api/validate")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
