@@ -13,8 +13,8 @@ public class EmailBodyLogic {
                                                 "Osoite: %s, %s %s\n" +
                                                 "Palvelu: %s\n" +
                                                 "Hinta: %.2f EUR\n" +
-                                                "Aloitusaika: %s\n" +
-                                                "Lopetusaika: %s\n",
+                                                "Ajankohta: %s\n" +
+                                                "Arvioitu kesto: %d tuntia %d minuuttia\n",
                                 reservation.getFName(), reservation.getLName(),
                                 reservation.getPhone(),
                                 reservation.getAddress(), reservation.getCity(), reservation.getPostalcode(),
@@ -22,13 +22,14 @@ public class EmailBodyLogic {
                                                 : "Ei määritelty",
                                 reservation.getPrice(),
                                 TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                                TimeUtil.formatToHelsinkiTime(reservation.getEndTime()));
+                                reservation.getNailService().getDuration() / 60,
+                                reservation.getNailService().getDuration() % 60);
         }
 
         public static String createNewReservationEmail(ReservationEntity reservation) {
                 return String.format(
                                 "Hei, kiitos varauksestasi!\n\n%s\nNähdään pian!",
-                                createReservationEmailBody(reservation));
+                                createReservationEmailBody(reservation) + "\nVarauksen paikka on Tikkurilassa Tikkuraitin vieressä. Tarkka osoite ilmoitetaan teille pian!";);
         }
 
         public static String updatedReservationEmail(ReservationEntity originalReservation,
