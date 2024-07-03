@@ -29,7 +29,8 @@ public class EmailBodyLogic {
         public static String createNewReservationEmail(ReservationEntity reservation) {
                 return String.format(
                                 "Hei, kiitos varauksestasi!\n\n%s\nNähdään pian!",
-                                createReservationEmailBody(reservation) + "\nVarauksen paikka on Tikkurilassa Tikkuraitin vieressä. Tarkka osoite ilmoitetaan teille pian!";);
+                                createReservationEmailBody(reservation)
+                                                + "\nVarauksen paikka on Tikkurilassa Tikkuraitin vieressä. Tarkka osoite ilmoitetaan teille pian!");
         }
 
         public static String updatedReservationEmail(ReservationEntity originalReservation,
