@@ -259,14 +259,14 @@ public class ReservationRestController {
     public ResponseEntity<ReservationEntity> newReservation(@RequestBody ReservationEntity reservation) {
         ReservationEntity createdReservation = reservationService.saveReservation(reservation);
         try {
-            EmailSender.sendEmail(createdReservation.getEmail(),
+            EmailSender.sendEmail(reservation.getEmail(),
                     "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
                             + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createNewReservationEmail(createdReservation));
+                    EmailBodyLogic.createNewReservationEmail(reservation));
             EmailSender.sendEmail(System.getenv("EMAIL_ADMIN"),
                     "Uusi varaus, " + reservation.getLName() + " "
                             + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createNewReservationEmail(createdReservation));
+                    EmailBodyLogic.createNewReservationEmail(reservation));
         } catch (Exception ex) {
             System.out.println("Email wasnt sent");
         }
