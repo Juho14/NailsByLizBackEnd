@@ -18,14 +18,6 @@ public class EmailSender {
         String port = System.getenv("MAILGUN_SMTP_PORT");
         String senderAddress = System.getenv("SENDER_EMAIL_ADDRESS");
 
-        System.out.println("MAILGUN_SMTP_LOGIN: " + System.getenv("MAILGUN_SMTP_LOGIN"));
-        System.out.println("MAILGUN_SMTP_PASSWORD: " + System.getenv("MAILGUN_SMTP_PASSWORD"));
-        System.out.println("MAILGUN_SMTP_SERVER: " + System.getenv("MAILGUN_SMTP_SERVER"));
-        System.out.println("MAILGUN_SMTP_PORT: " + System.getenv("MAILGUN_SMTP_PORT"));
-        System.out.println("SENDER_EMAIL_ADDRESS: " + System.getenv("SENDER_EMAIL_ADDRESS"));
-        System.out.println("RECIEVER EMAIL: " + receiverEmail);
-        System.out.println(emailBody);
-
         Properties properties = System.getProperties();
         properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.smtp.ssl.protocols", "TLSv1.2");

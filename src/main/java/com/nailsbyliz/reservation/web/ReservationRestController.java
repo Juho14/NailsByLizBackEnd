@@ -89,7 +89,6 @@ public class ReservationRestController {
         String token = jwtService.resolveAccessToken(request);
         Long currUserId = jwtService.getIdFromToken(token);
         // Check if the customer ID is not null
-        System.out.println(currUserId);
         if (currUserId != null) {
             Iterable<ReservationEntity> reservations = reservationRepository.findByCustomerId(currUserId);
             List<?> response = mapToUserDTOs(reservations);

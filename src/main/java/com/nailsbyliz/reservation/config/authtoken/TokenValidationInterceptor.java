@@ -41,7 +41,7 @@ public class TokenValidationInterceptor implements HandlerInterceptor {
         // Extract and validate access token
         String accessToken = jwtService.resolveAccessToken(request);
         if (accessToken == null || !jwtService.validateToken(accessToken)) {
-            System.out.println("Access token scuffed");
+            System.out.println("Access token error");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token not provided or invalid");
             return false;
         }
@@ -54,7 +54,7 @@ public class TokenValidationInterceptor implements HandlerInterceptor {
         // Extract and validate auth token
         String authToken = jwtService.resolveAuthToken(request);
         if (authToken == null || !jwtService.validateToken(authToken)) {
-            System.out.println("Auth token scuffed");
+            System.out.println("Auth token error");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Auth token not provided or invalid");
             return false;
         }
@@ -62,7 +62,7 @@ public class TokenValidationInterceptor implements HandlerInterceptor {
         // Get authenticated user details
         UsernamePasswordAuthenticationToken authentication = jwtService.getAuthUser(request);
         if (authentication == null) {
-            System.out.println("Authentication scuffed");
+            System.out.println("Authentication error");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User authentication failed");
             return false;
         }
@@ -87,7 +87,7 @@ public class TokenValidationInterceptor implements HandlerInterceptor {
                     return true;
                 }
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Role not provided or invalid");
-                System.out.println("Role scuffed");
+                System.out.println("Role error");
                 return false;
             }
         }

@@ -14,8 +14,7 @@ public class EmailBodyLogic {
                                                 "Palvelu: %s\n" +
                                                 "Hinta: %.2f EUR\n" +
                                                 "Aloitusaika: %s\n" +
-                                                "Lopetusaika: %s\n" +
-                                                "Tila: %s\n",
+                                                "Lopetusaika: %s\n",
                                 reservation.getFName(), reservation.getLName(),
                                 reservation.getPhone(),
                                 reservation.getAddress(), reservation.getCity(), reservation.getPostalcode(),
@@ -23,8 +22,7 @@ public class EmailBodyLogic {
                                                 : "Ei määritelty",
                                 reservation.getPrice(),
                                 TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                                TimeUtil.formatToHelsinkiTime(reservation.getEndTime()),
-                                reservation.getStatus());
+                                TimeUtil.formatToHelsinkiTime(reservation.getEndTime()));
         }
 
         public static String createNewReservationEmail(ReservationEntity reservation) {

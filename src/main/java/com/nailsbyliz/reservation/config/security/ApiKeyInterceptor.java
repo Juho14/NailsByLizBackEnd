@@ -23,7 +23,7 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        System.out.println("Api key scuffed");
+        System.out.println("Api key error");
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid API Key");
         return false;
 
