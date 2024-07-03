@@ -104,13 +104,14 @@ public class NailServiceRestController {
     public ResponseEntity<?> getServiceById(@PathVariable Long serviceId, HttpServletRequest request) {
         Optional<NailServiceEntity> service = nailRepo.findById(serviceId);
         String token = jwtService.resolveAccessToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
+        }
 
         if (service.isPresent()) {
             Object response;
 
-            // Check if the token is present
-            // Token is present, validate it
             if ("ROLE_ADMIN".equals(userRole)) {
                 response = mapToAdminDTO(service.get());
             } else {

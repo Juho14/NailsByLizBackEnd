@@ -18,7 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.nailsbyliz.reservation.web.UserDetailServiceImpl;
+import com.nailsbyliz.reservation.service.UserDetailServiceImpl;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)

@@ -33,6 +33,7 @@ import com.nailsbyliz.reservation.email.EmailSender;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
+import com.nailsbyliz.reservation.service.UserDetailServiceImpl;
 import com.nailsbyliz.reservation.util.TimeUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -210,7 +211,10 @@ public class ReservationRestController {
             HttpServletRequest request) {
 
         String token = jwtService.resolveAccessToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String userRole = "";
+        if (token != null) {
+
+        }
 
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
@@ -235,9 +239,6 @@ public class ReservationRestController {
         String token = jwtService.resolveAccessToken(request);
         if (token != null) {
             userRole = jwtService.getRoleFromToken(token);
-            System.out.println("Role: " + userRole);
-        } else {
-            System.out.println("Token is null?");
         }
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
@@ -300,9 +301,13 @@ public class ReservationRestController {
     }
 
     @PutMapping("/cancel/{reservationId}")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<String> cancelReservation(@PathVariable Long reservationId, HttpServletRequest request) {
 
-        Long userId = (Long) request.getAttribute("userId");
+        String token = jwtService.resolveAuthToken(request);
+        Long userId = jwtService.getIdFromToken(token);
+        String userRole = jwtService.getRoleFromToken(token);
+
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
         }
@@ -312,8 +317,6 @@ public class ReservationRestController {
         if (reservation == null) {
             return ResponseEntity.notFound().build();
         }
-
-        String userRole = (String) request.getAttribute("userRole");
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startTime = reservation.getStartTime();

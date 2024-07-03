@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.AppUserEntity;
+import com.nailsbyliz.reservation.email.EmailSender;
 import com.nailsbyliz.reservation.repositories.AppUserRepository;
 import com.nailsbyliz.reservation.service.AppUserService;
 import com.nailsbyliz.reservation.service.AuthService;
@@ -60,7 +60,7 @@ public class AppUserRestController {
 
     // Get a specific user
     @GetMapping("/{userId}")
-    public ResponseEntity<AppUserEntity> getaAppUserById(@PathVariable Long userId) {
+    public ResponseEntity<AppUserEntity> getaAppUserById(@PathVariable Long userId, HttpServletRequest request) {
         AppUserEntity appUser = userService.getUserById(userId);
         if (appUser != null) {
             return ResponseEntity.ok(appUser);
@@ -72,8 +72,24 @@ public class AppUserRestController {
     // Create a new user
     @PostMapping
     public ResponseEntity<AppUserEntity> createAppUser(@RequestBody AppUserEntity createdAppUser) {
-        AppUserEntity creaAppUser = userService.createUser(createdAppUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creaAppUser);
+        AppUserEntity newAppUser = userService.createUser(createdAppUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newAppUser);
+    }
+
+    // Public registration endpoint
+    @PostMapping("/register")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> registerUser(@RequestBody AppUserEntity createdAppUser) {
+        createdAppUser.setRole("ROLE_USER");
+        AppUserEntity newAppUser = userService.createUser(createdAppUser);
+        try {
+            EmailSender.sendEmail(newAppUser.getEmail(),
+                    "Nailzbyliz.fi rekisteröinti, " + newAppUser.getLName(),
+                    "Hei, käyttäjänne on nyt rekisteröity. Jos et itse luonut tätä käyttäjää, laita sähköpostia osoitteeseen info@nailsbyliz.fi, ja poistamme tilin.");
+        } catch (Exception ex) {
+            System.out.println("Email wasnt sent");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(newAppUser);
     }
 
     // Edit a user
@@ -89,9 +105,11 @@ public class AppUserRestController {
         }
     }
 
-    // Delete a user
+    // Delete current user
     @DeleteMapping
-    public ResponseEntity<Void> deleteAppUser(@RequestHeader("Authorization") String token) {
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteAppUser(HttpServletRequest request) {
+        String token = jwtService.resolveAuthToken(request);
         Long userId = jwtService.getIdFromToken(token);
         boolean deleted = userService.deleteUser(userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
@@ -100,7 +118,11 @@ public class AppUserRestController {
     // Delete a specific
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteAppUser(HttpServletRequest request, @PathVariable Long userId) {
-        String userRole = (String) request.getAttribute("userRole");
+        String token = jwtService.resolveAuthToken(request);
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
+        }
 
         if ("ROLE_ADMIN".equals(userRole)) {
             Optional<AppUserEntity> deletedUserOptional = userRepo.findById(userId);
@@ -110,7 +132,7 @@ public class AppUserRestController {
                 deletedUser = deletedUserOptional.get();
                 deletedUserRole = deletedUser.getRole();
             }
-            // Token is valid
+            // Double check that theres always at least 1 admin left
             if (deletedUserRole == "ROLE_ADMIN") {
                 Iterable<AppUserEntity> admins = userRepo.findByRole("ROLE_ADMIN");
                 List<AppUserEntity> adminList = StreamSupport.stream(admins.spliterator(), false)
@@ -132,10 +154,13 @@ public class AppUserRestController {
 
     // Change password
     @PutMapping("/password")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> updatePassword(@RequestBody AppUserEntity updatedUser,
             HttpServletRequest request) {
 
-        Long userId = (Long) request.getAttribute("userId");
+        String token = jwtService.resolveAuthToken(request);
+        Long userId = jwtService.getIdFromToken(token);
+
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }

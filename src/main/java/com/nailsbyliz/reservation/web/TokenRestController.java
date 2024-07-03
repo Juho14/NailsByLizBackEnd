@@ -60,7 +60,8 @@ public class TokenRestController {
         }
     }
 
-    @GetMapping("/api/public/validate")
+    @GetMapping("/api/validate")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> validateToken(HttpServletRequest request) {
         String accessToken = jwtService.resolveAccessToken(request);
         Map<String, String> response = new HashMap<>();
@@ -86,7 +87,7 @@ public class TokenRestController {
         }
     }
 
-    @PostMapping("/api/public/refresh")
+    @PostMapping("/api/refresh")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String accessToken = jwtService.resolveAccessToken(request);
         Map<String, String> response = new HashMap<>();
