@@ -25,14 +25,15 @@ public class EmailBodyLogic {
                                 reservation.getPrice(),
                                 TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
                                 reservation.getNailService().getDuration() / 60,
-                                reservation.getNailService().getDuration() % 60);
+                                reservation.getNailService().getDuration() % 60) + "\n\n";
         }
 
         public static String createNewReservationEmail(ReservationEntity reservation) {
                 return String.format(
                                 "Hei, kiitos varauksestasi!\n\n" +
                                                 createReservationEmailBody(reservation) +
-                                                "\n\n");
+                                                "\n\n"
+                                                + "Varauksen paikka on Tikkurilassa Tikkuraitin vieressä. \nTarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n\n");
         }
 
         public static String updatedReservationEmail(ReservationEntity originalReservation,
@@ -45,8 +46,6 @@ public class EmailBodyLogic {
         }
 
         public static String getEmailEnd() {
-                return "Varauksen paikka on Tikkurilassa Tikkuraitin vieressä. Tarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n"
-                                +
-                                "Yhteyden otot ja kynsiehdotukset/ideat sähköpostitse info@nailsbyliz.fi tai <a href='https://www.instagram.com/nailsbyliz.fi'>Instagramissa @nailsbyliz.fi</a>";
+                return "Yhteyden otot ja kynsiehdotukset/ideat sähköpostitse info@nailsbyliz.fi tai <a href='https://www.instagram.com/nailsbyliz.fi'>Instagramissa @nailsbyliz.fi</a>";
         }
 }
