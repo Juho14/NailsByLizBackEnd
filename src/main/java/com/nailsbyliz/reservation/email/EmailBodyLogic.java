@@ -31,28 +31,8 @@ public class EmailBodyLogic {
         public static String createNewReservationEmail(ReservationEntity reservation) {
                 return String.format(
                                 "Hei, kiitos varauksestasi!\n\n" +
-                                                "Varauksen tiedot:\n" +
-                                                "Nimi: %s %s\n" +
-                                                "Puhelin: %s\n" +
-                                                "Sposti: %s\n" +
-                                                "Osoite: %s, %s %s\n" +
-                                                "Palvelu: %s\n" +
-                                                "Hinta: %.2f EUR\n" +
-                                                "Ajankohta: %s\n" +
-                                                "Arvioitu kesto: %d tuntia %d minuuttia\n\n" +
-                                                "Varauksen paikka on Tikkurilassa Tikkuraitin vieressä. Tarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n"
-                                                +
-                                                "Yhteyden otot ja kynsiehdotukset/ideat sähköpostitse info@nailsbyliz.fi tai Instagramissa <a href='https://www.instagram.com/nailsbyliz.fi'>nailsbyliz.fi</a>",
-                                reservation.getFName(), reservation.getLName(),
-                                reservation.getPhone(),
-                                reservation.getEmail(),
-                                reservation.getAddress(), reservation.getCity(), reservation.getPostalcode(),
-                                reservation.getNailService() != null ? reservation.getNailService().getType()
-                                                : "Ei määritelty",
-                                reservation.getPrice(),
-                                TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                                reservation.getNailService().getDuration() / 60,
-                                reservation.getNailService().getDuration() % 60);
+                                                createReservationEmailBody(reservation) +
+                                                "\n\n" + getEmailEnd());
         }
 
         public static String updatedReservationEmail(ReservationEntity originalReservation,
@@ -62,5 +42,11 @@ public class EmailBodyLogic {
                                 TimeUtil.formatToHelsinkiTime(updatedReservation.getStartTime()),
                                 createReservationEmailBody(originalReservation),
                                 createReservationEmailBody(updatedReservation));
+        }
+
+        public static String getEmailEnd() {
+                return "Varauksen paikka on Tikkurilassa Tikkuraitin vieressä. Tarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n"
+                                +
+                                "Yhteyden otot ja kynsiehdotukset/ideat sähköpostitse info@nailsbyliz.fi tai Instagramissa <a href='https://www.instagram.com/nailsbyliz.fi'>nailsbyliz.fi</a>";
         }
 }

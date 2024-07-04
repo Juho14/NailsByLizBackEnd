@@ -261,11 +261,11 @@ public class ReservationRestController {
             EmailSender.sendEmail(reservation.getEmail(),
                     "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
                             + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createNewReservationEmail(reservation));
+                    EmailBodyLogic.createNewReservationEmail(reservation), EmailBodyLogic.getEmailEnd());
             EmailSender.sendEmail(System.getenv("EMAIL_ADMIN"),
                     "Uusi varaus, " + reservation.getLName() + " "
                             + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createReservationEmailBody(reservation));
+                    EmailBodyLogic.createReservationEmailBody(reservation), EmailBodyLogic.getEmailEnd());
         } catch (Exception ex) {
             System.out.println("Email wasnt sent");
         }
@@ -289,7 +289,8 @@ public class ReservationRestController {
                 EmailSender.sendEmail(updatedReservation.getEmail(),
                         "Varuksenne tietoja muutettu, " + updatedReservation.getLName()
                                 + TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
-                        EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation));
+                        EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation),
+                        EmailBodyLogic.getEmailEnd());
             } catch (Exception ex) {
                 System.out.println("Email wasnt sent");
             }
