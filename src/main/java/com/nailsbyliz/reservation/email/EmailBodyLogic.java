@@ -25,14 +25,14 @@ public class EmailBodyLogic {
                                 reservation.getPrice(),
                                 TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
                                 reservation.getNailService().getDuration() / 60,
-                                reservation.getNailService().getDuration() % 60) + "\n\n";
+                                reservation.getNailService().getDuration() % 60);
         }
 
         public static String createNewReservationEmail(ReservationEntity reservation) {
                 return String.format(
                                 "Hei, kiitos varauksestasi!\n\n" +
                                                 createReservationEmailBody(reservation) +
-                                                "\n\n"
+                                                "\n"
                                                 + "Varauksen paikka on Tikkurilassa Tikkuraitin vieressä. \nTarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n\n");
         }
 
