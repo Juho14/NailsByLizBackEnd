@@ -47,6 +47,6 @@ public class EmailBodyLogic {
         public static String getEmailEnd() {
                 return "Varauksen paikka on Tikkurilassa Tikkuraitin vieressä. Tarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n"
                                 +
-                                "Yhteyden otot ja kynsiehdotukset/ideat sähköpostitse info@nailsbyliz.fi tai Instagramissa <a href='https://www.instagram.com/nailsbyliz.fi'>nailsbyliz.fi</a>";
+                                "Yhteyden otot ja kynsiehdotukset/ideat sähköpostitse info@nailsbyliz.fi tai <a href='https://www.instagram.com/nailsbyliz.fi'>Instagramissa @nailsbyliz.fi</a>";
         }
 }
