@@ -12,7 +12,8 @@ import javax.mail.internet.MimeMultipart;
 
 public class EmailSender {
 
-    public static void sendEmail(String receiverEmail, String title, String emailBody) throws Exception {
+    public static void sendEmail(String receiverEmail, String title, String emailBody, String bodyEnd)
+            throws Exception {
 
         String from = System.getenv("MAILGUN_SMTP_LOGIN");
         String pass = System.getenv("MAILGUN_SMTP_PASSWORD");
@@ -38,18 +39,21 @@ public class EmailSender {
             MimeMessage message = new MimeMessage(session);
 
             message.setFrom(new InternetAddress(senderAddress));
-
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(receiverEmail));
-
             message.setSubject(title);
 
-            // Create MimeBodyPart object and set the email text
-            MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setContent(emailBody, "text/html; charset=utf-8");
+            // Create MimeBodyPart object for plain text
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setText(emailBody, "utf-8");
 
-            // Create a Multipart object and add the body part to it
+            // Create MimeBodyPart object for HTML content
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(bodyEnd, "text/html; charset=utf-8");
+
+            // Create a Multipart object and add both body parts to it
             MimeMultipart multipart = new MimeMultipart();
-            multipart.addBodyPart(messageBodyPart);
+            multipart.addBodyPart(textPart);
+            multipart.addBodyPart(htmlPart);
 
             // Set the multipart content to the message
             message.setContent(multipart);
@@ -63,7 +67,7 @@ public class EmailSender {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Error while sending.");
-            throw e;
+            throw e; // Re-throw the exception to handle it properly in the calling method
         }
     }
 }
