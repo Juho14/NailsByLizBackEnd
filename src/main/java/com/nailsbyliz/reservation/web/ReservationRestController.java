@@ -265,7 +265,7 @@ public class ReservationRestController {
             EmailSender.sendEmail(System.getenv("EMAIL_ADMIN"),
                     "Uusi varaus, " + reservation.getLName() + " "
                             + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createNewReservationEmail(reservation));
+                    EmailBodyLogic.createReservationEmailBody(reservation));
         } catch (Exception ex) {
             System.out.println("Email wasnt sent");
         }
