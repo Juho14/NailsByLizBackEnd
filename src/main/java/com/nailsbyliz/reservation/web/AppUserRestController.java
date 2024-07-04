@@ -85,7 +85,8 @@ public class AppUserRestController {
         try {
             EmailSender.sendEmail(newAppUser.getEmail(),
                     "Nailzbyliz.fi rekisteröinti, " + newAppUser.getLName(),
-                    "Hei, käyttäjänne on nyt rekisteröity. Jos et itse luonut tätä käyttäjää, laita sähköpostia osoitteeseen info@nailsbyliz.fi, ja poistamme tilin.");
+                    "Hei, käyttäjänne on nyt rekisteröity. Jos et itse luonut tätä käyttäjää, laita sähköpostia osoitteeseen info@nailsbyliz.fi, ja poistamme tilin.",
+                    null);
         } catch (Exception ex) {
             System.out.println("Email wasnt sent");
         }
