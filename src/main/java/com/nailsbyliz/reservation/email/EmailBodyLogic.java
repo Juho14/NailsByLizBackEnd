@@ -32,7 +32,7 @@ public class EmailBodyLogic {
                 return String.format(
                                 "Hei, kiitos varauksestasi!\n\n" +
                                                 createReservationEmailBody(reservation) +
-                                                "\n\n" + getEmailEnd());
+                                                "\n\n");
         }
 
         public static String updatedReservationEmail(ReservationEntity originalReservation,
