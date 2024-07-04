@@ -6,7 +6,9 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 public class EmailSender {
 
@@ -41,8 +43,18 @@ public class EmailSender {
 
             message.setSubject(title);
 
-            message.setText(emailBody);
+            // Create MimeBodyPart object and set the email text
+            MimeBodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setContent(emailBody, "text/html; charset=utf-8");
 
+            // Create a Multipart object and add the body part to it
+            MimeMultipart multipart = new MimeMultipart();
+            multipart.addBodyPart(messageBodyPart);
+
+            // Set the multipart content to the message
+            message.setContent(multipart);
+
+            // Send the message
             Transport transport = session.getTransport("smtp");
             transport.connect(host, from, pass);
             transport.sendMessage(message, message.getAllRecipients());
@@ -51,7 +63,7 @@ public class EmailSender {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Error while sending.");
-
+            throw e;
         }
     }
 }
