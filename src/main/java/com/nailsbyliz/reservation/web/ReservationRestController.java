@@ -65,7 +65,7 @@ public class ReservationRestController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllReservations(HttpServletRequest request) {
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = jwtService.getRoleFromToken(token);
 
         Iterable<ReservationEntity> reservations;
@@ -86,7 +86,7 @@ public class ReservationRestController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<?> getReservationsForUser(HttpServletRequest request) {
         // Extract the user ID from the request attribute set by the interceptor
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         Long currUserId = jwtService.getIdFromToken(token);
         // Check if the customer ID is not null
         if (currUserId != null) {
@@ -101,7 +101,7 @@ public class ReservationRestController {
 
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<?> getReservationsForUser(HttpServletRequest request, @PathVariable Long customerId) {
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = jwtService.getRoleFromToken(token);
 
         if (!"ROLE_ADMIN".equals(userRole)) {
@@ -209,13 +209,10 @@ public class ReservationRestController {
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
             HttpServletRequest request) {
 
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = "";
         if (token != null) {
-            userRole = "";
-            if (token != null) {
-
-            }
+            userRole = jwtService.getRoleFromToken(token);
         }
         // Check if the user is an admin
         if ("ROLE_ADMIN".equals(userRole)) {
@@ -237,7 +234,7 @@ public class ReservationRestController {
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day,
             HttpServletRequest request) {
         String userRole = "";
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         if (token != null) {
             userRole = "";
             if (token != null) {
@@ -286,7 +283,7 @@ public class ReservationRestController {
     public ResponseEntity<?> updateReservation(@PathVariable Long reservationId,
             @RequestBody ReservationEntity updatedReservation, HttpServletRequest request) {
 
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = jwtService.getRoleFromToken(token);
 
         if (!userRole.equals("ROLE_ADMIN")) {
@@ -353,7 +350,7 @@ public class ReservationRestController {
 
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<?> deleteReservation(HttpServletRequest request, @PathVariable Long reservationId) {
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = jwtService.getRoleFromToken(token);
         if (!userRole.equals("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");

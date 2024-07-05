@@ -44,7 +44,7 @@ public class NailServiceRestController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllNailServices(HttpServletRequest request) {
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = "";
         if (token != null) {
             userRole = jwtService.getRoleFromToken(token);
@@ -103,7 +103,7 @@ public class NailServiceRestController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getServiceById(@PathVariable Long serviceId, HttpServletRequest request) {
         Optional<NailServiceEntity> service = nailRepo.findById(serviceId);
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = "";
         if (token != null) {
             userRole = jwtService.getRoleFromToken(token);
@@ -155,7 +155,7 @@ public class NailServiceRestController {
     @PostMapping
     public ResponseEntity<?> newNailSerEntity(@RequestBody NailServiceEntity newService,
             HttpServletRequest request) {
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = "";
         if (token != null) {
             userRole = jwtService.getRoleFromToken(token);

@@ -78,7 +78,7 @@ public class ReservationSettingsRestController {
     @PostMapping
     public ResponseEntity<ReservationSettings> createReservationSettings(
             @RequestBody ReservationSettings reservationSettings, HttpServletRequest request) {
-        String token = jwtService.resolveAccessToken(request);
+        String token = jwtService.resolveAuthToken(request);
         String userRole = jwtService.getRoleFromToken(token);
         System.out.println("Token: " + token);
         System.out.println("User Role: " + userRole);
