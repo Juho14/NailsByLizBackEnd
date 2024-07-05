@@ -13,10 +13,26 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private TokenValidationInterceptor tokenValidationInterceptor;
 
+    @Autowired
+    private ApiKeyInterceptor apiKeyInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tokenValidationInterceptor)
                 .excludePathPatterns("/api/public/**")
                 .addPathPatterns("/api/**");
+
+        registry.addInterceptor(apiKeyInterceptor)
+                .addPathPatterns("/api/reservations")
+                .addPathPatterns("/api/reservationsettings/active")
+                .addPathPatterns("/api/nailservices")
+                .addPathPatterns("/api/nailservices/**")
+                .addPathPatterns("/api/reservations/byday/**")
+                .addPathPatterns("/api/reservations/byweek/**")
+                .addPathPatterns("/api/public/token")
+                .addPathPatterns("/api/users/register")
+                .addPathPatterns("/api/public/login");
+        // .addPathPatterns("/api/public/token");
+
     }
 }

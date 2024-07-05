@@ -16,13 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.ReservationSettings;
 import com.nailsbyliz.reservation.repositories.ReservationSettingsRepository;
 import com.nailsbyliz.reservation.service.ReservationSettingsService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/reservationsettings")
-// @PreAuthorize("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class ReservationSettingsRestController {
 
     @Autowired
@@ -30,6 +33,9 @@ public class ReservationSettingsRestController {
 
     @Autowired
     ReservationSettingsService settingService;
+
+    @Autowired
+    JwtService jwtService;
 
     // READ all
     @GetMapping
@@ -71,7 +77,12 @@ public class ReservationSettingsRestController {
     // CREATE
     @PostMapping
     public ResponseEntity<ReservationSettings> createReservationSettings(
-            @RequestBody ReservationSettings reservationSettings) {
+            @RequestBody ReservationSettings reservationSettings, HttpServletRequest request) {
+        String token = jwtService.resolveAccessToken(request);
+        String userRole = jwtService.getRoleFromToken(token);
+        System.out.println("Token: " + token);
+        System.out.println("User Role: " + userRole);
+
         ReservationSettings savedReservationSettings = reservationSettingsRepository.save(reservationSettings);
         return new ResponseEntity<>(savedReservationSettings, HttpStatus.CREATED);
     }

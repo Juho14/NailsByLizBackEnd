@@ -1,4 +1,4 @@
-package com.nailsbyliz.reservation.web;
+package com.nailsbyliz.reservation.service;
 
 import java.util.Optional;
 

@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:1102")
+                .allowedOrigins("http://localhost:1102", "https://juho14.github.io")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
@@ -24,7 +24,8 @@ public class WebConfig implements WebMvcConfigurer {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:1102"); // Add your allowed origins here
+        config.addAllowedOrigin("http://localhost:1102");
+        config.addAllowedOrigin("https://juho14.github.io");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 

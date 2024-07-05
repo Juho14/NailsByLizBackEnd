@@ -8,7 +8,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -30,12 +29,13 @@ import jakarta.servlet.http.HttpServletRequest;
 public class JwtService {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
-    static final long EXPIRATIONTIME = 1000 * 60 * 60 * 24;
-    // static final long EXPIRATIONTIME = 120000; // 4 seconds for development
+    static final long AUTH_TOKEN_EXPIRATION = 1000 * 60 * 10; // 10 minutes
+    static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
     static final String PREFIX = "Bearer";
     static final String secretKey = System.getenv("JWT_SECRET_KEY");
-
-    Key key;
+    // static final String secretKey =
+    // "Renatemeoweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeelöaksjdflajflk";
+    private final Key key;
 
     @Autowired
     private AppUserRepository repository;
@@ -45,30 +45,10 @@ public class JwtService {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String getToken(CustomUserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", userDetails.getId());
-        claims.put("fname", userDetails.getFname());
-        claims.put("lname", userDetails.getLname());
-        claims.put("phone", userDetails.getPhone());
-        claims.put("email", userDetails.getEmail());
-        claims.put("address", userDetails.getAddress());
-        claims.put("postalcode", userDetails.getPostalcode());
-        claims.put("city", userDetails.getCity());
-        claims.put("role", userDetails.getRole());
-
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .addClaims(claims)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
-                .signWith(key)
-                .compact();
-    }
-
     public UsernamePasswordAuthenticationToken getAuthUser(HttpServletRequest request) {
-        String token = resolveToken(request);
+        String token = resolveAccessToken(request);
         try {
-            if (token != null) {
+            if (token != null && validateToken(token)) {
                 Claims claims = getClaimsFromToken(token);
                 Long userId = claims.get("id", Long.class);
                 if (userId != null) {
@@ -102,28 +82,59 @@ public class JwtService {
         }
     }
 
-    public Long getIdFromToken(String token) {
-        Claims claims = getClaimsFromToken(token);
-        Integer userIdObject = (Integer) claims.get("id");
-        if (userIdObject != null) {
-            return userIdObject.longValue();
-        }
-        throw new BadCredentialsException("User ID not found in token");
+    public String generateAuthToken(CustomUserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", userDetails.getId());
+        claims.put("fname", userDetails.getFname());
+        claims.put("lname", userDetails.getLname());
+        claims.put("phone", userDetails.getPhone());
+        claims.put("email", userDetails.getEmail());
+        claims.put("address", userDetails.getAddress());
+        claims.put("postalcode", userDetails.getPostalcode());
+        claims.put("city", userDetails.getCity());
+        claims.put("role", userDetails.getRole());
+
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .addClaims(claims)
+                .setExpiration(new Date(System.currentTimeMillis() + AUTH_TOKEN_EXPIRATION))
+                .signWith(key)
+                .compact();
     }
 
-    private Claims getClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .setAllowedClockSkewSeconds(60) // Allow 60 seconds of clock skew
-                .build()
-                .parseClaimsJws(token.replace(PREFIX, "").trim())
-                .getBody();
+    public String generateAccessToken(CustomUserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", userDetails.getId());
+        claims.put("role", userDetails.getRole());
+
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .addClaims(claims)
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(key)
+                .compact();
+    }
+
+    public String resolveAccessToken(HttpServletRequest request) {
+        String token = request.getHeader("Access-Token");
+        if (token != null && token.startsWith(PREFIX)) {
+            return token.substring(PREFIX.length()).trim();
+        }
+        return null;
+    }
+
+    public String resolveAuthToken(HttpServletRequest request) {
+        String token = request.getHeader("Auth-Token");
+        if (token != null && token.startsWith(PREFIX)) {
+            return token.substring(PREFIX.length()).trim();
+        }
+        return null;
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).setAllowedClockSkewSeconds(1).build()
-                    .parseClaimsJws(token.replace(PREFIX, "").trim());
+            Jwts.parserBuilder().setSigningKey(key).setAllowedClockSkewSeconds(60).build()
+                    .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
             logger.error("Token has expired", e);
@@ -141,16 +152,22 @@ public class JwtService {
         return false;
     }
 
-    public String resolveToken(HttpServletRequest request) {
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (token != null && token.startsWith(PREFIX)) {
-            return token.substring(PREFIX.length()).trim();
-        }
-        return null;
+    public Long getIdFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        return claims.get("id", Long.class);
     }
 
     public String getRoleFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
-        return (String) claims.get("role");
+        return claims.get("role", String.class);
+    }
+
+    private Claims getClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .setAllowedClockSkewSeconds(60)
+                .build()
+                .parseClaimsJws(token.replace(PREFIX, "").trim())
+                .getBody();
     }
 }

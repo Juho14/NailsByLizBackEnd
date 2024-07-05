@@ -5,6 +5,7 @@ public class NailServiceCustomerDTO {
     private String type;
     private int duration;
     private double price;
+    private String description;
 
     public Long getId() {
         return this.id;
@@ -36,6 +37,14 @@ public class NailServiceCustomerDTO {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

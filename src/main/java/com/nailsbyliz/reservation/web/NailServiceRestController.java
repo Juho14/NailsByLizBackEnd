@@ -22,14 +22,13 @@ import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.dto.NailServiceAdminDTO;
 import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
 import com.nailsbyliz.reservation.repositories.NailServiceRepository;
-import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.NailService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-// @PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequestMapping("/api/nailservices")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class NailServiceRestController {
 
     @Autowired
@@ -39,16 +38,13 @@ public class NailServiceRestController {
     NailService nailService;
 
     @Autowired
-    AuthService authService;
-
-    @Autowired
     JwtService jwtService;
 
     // To show all available services
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllNailServices(HttpServletRequest request) {
-        String token = jwtService.resolveToken(request);
+        String token = jwtService.resolveAccessToken(request);
         String userRole = "";
         if (token != null) {
             userRole = jwtService.getRoleFromToken(token);
@@ -76,6 +72,7 @@ public class NailServiceRestController {
             dto.setType(service.getType());
             dto.setDuration(service.getDuration());
             dto.setPrice(service.getPrice());
+            dto.setDescription(service.getDescription());
             dto.setAdminService(service.isAdminService());
             dtos.add(dto);
         }
@@ -95,6 +92,7 @@ public class NailServiceRestController {
             dto.setType(service.getType());
             dto.setDuration(service.getDuration());
             dto.setPrice(service.getPrice());
+            dto.setDescription(service.getDescription());
             dtos.add(dto);
         }
         return dtos;
@@ -105,14 +103,15 @@ public class NailServiceRestController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getServiceById(@PathVariable Long serviceId, HttpServletRequest request) {
         Optional<NailServiceEntity> service = nailRepo.findById(serviceId);
-        String token = jwtService.resolveToken(request);
-        String userRole = jwtService.getRoleFromToken(token);
+        String token = jwtService.resolveAccessToken(request);
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
+        }
 
         if (service.isPresent()) {
             Object response;
 
-            // Check if the token is present
-            // Token is present, validate it
             if ("ROLE_ADMIN".equals(userRole)) {
                 response = mapToAdminDTO(service.get());
             } else {
@@ -133,13 +132,14 @@ public class NailServiceRestController {
         dto.setDuration(service.getDuration());
         dto.setPrice(service.getPrice());
         dto.setAdminService(service.isAdminService());
+        dto.setDescription(service.getDescription());
         return dto;
     }
 
     private NailServiceCustomerDTO mapToCustomerDTO(NailServiceEntity service) {
         // Skip admin-only services
         if (service.isAdminService()) {
-            return null; // or handle accordingly
+            return null;
         }
 
         NailServiceCustomerDTO dto = new NailServiceCustomerDTO();
@@ -147,22 +147,31 @@ public class NailServiceRestController {
         dto.setType(service.getType());
         dto.setDuration(service.getDuration());
         dto.setPrice(service.getPrice());
+        dto.setDescription(service.getDescription());
         return dto;
     }
 
     // Create a new type of service
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<NailServiceEntity> newNailSerEntity(@RequestBody NailServiceEntity newService) {
+    public ResponseEntity<?> newNailSerEntity(@RequestBody NailServiceEntity newService,
+            HttpServletRequest request) {
+        String token = jwtService.resolveAccessToken(request);
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
+        }
+
+        if (!"ROLE_ADMIN".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
         NailServiceEntity createdNailServiceEntity = nailService.saveNailServiceEntity(newService);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNailServiceEntity);
     }
 
     // Edit existing services
     @PutMapping("/{serviceId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NailServiceEntity> updateNailServicEntity(@PathVariable Long serviceId,
-            @RequestBody NailServiceEntity updatedNailService) {
+            @RequestBody NailServiceEntity updatedNailService, HttpServletRequest request) {
         NailServiceEntity result = nailService.updateNailServiceEntity(serviceId, updatedNailService);
         if (result != null) {
             return ResponseEntity.ok(result);

@@ -5,6 +5,7 @@ public class NailServiceAdminDTO {
     private String type;
     private int duration;
     private double price;
+    private String description;
     private boolean adminService;
 
     public Long getId() {
@@ -37,6 +38,14 @@ public class NailServiceAdminDTO {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean isAdminService() {
