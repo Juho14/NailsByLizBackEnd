@@ -6,6 +6,16 @@ import com.nailsbyliz.reservation.util.TimeUtil;
 public class EmailBodyLogic {
 
         public static String createReservationEmailBody(ReservationEntity reservation) {
+                int durationHours = reservation.getNailService().getDuration() / 60;
+                int durationMinutes = reservation.getNailService().getDuration() % 60;
+
+                String durationText;
+                if (durationMinutes > 0) {
+                        durationText = String.format("%d tuntia %d minuuttia", durationHours, durationMinutes);
+                } else {
+                        durationText = String.format("%d tuntia", durationHours);
+                }
+
                 return String.format(
                                 "Varauksen tiedot:\n" +
                                                 "Nimi: %s %s\n" +
@@ -15,7 +25,7 @@ public class EmailBodyLogic {
                                                 "Palvelu: %s\n" +
                                                 "Hinta: %.2f EUR\n" +
                                                 "Ajankohta: %s\n" +
-                                                "Arvioitu kesto: %d tuntia %d minuuttia\n",
+                                                "Arvioitu kesto: %s\n",
                                 reservation.getFName(), reservation.getLName(),
                                 reservation.getPhone(),
                                 reservation.getEmail(),
@@ -24,8 +34,7 @@ public class EmailBodyLogic {
                                                 : "Ei määritelty",
                                 reservation.getPrice(),
                                 TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                                reservation.getNailService().getDuration() / 60,
-                                reservation.getNailService().getDuration() % 60);
+                                durationText);
         }
 
         public static String createNewReservationEmail(ReservationEntity reservation) {

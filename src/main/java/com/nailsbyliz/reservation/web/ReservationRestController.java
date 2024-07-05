@@ -258,16 +258,21 @@ public class ReservationRestController {
     public ResponseEntity<ReservationEntity> newReservation(@RequestBody ReservationEntity reservation) {
         ReservationEntity createdReservation = reservationService.saveReservation(reservation);
         try {
-            EmailSender.sendEmail(reservation.getEmail(),
-                    "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
-                            + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createNewReservationEmail(reservation), EmailBodyLogic.getEmailEnd());
-            EmailSender.sendEmail(System.getenv("EMAIL_ADMIN"),
+            String adminEmail = System.getenv("EMAIL_ADMIN");
+            // Sending email to customer if not admin
+            if (!reservation.getEmail().equals(adminEmail)) {
+                EmailSender.sendEmail(reservation.getEmail(),
+                        "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
+                                + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
+                        EmailBodyLogic.createNewReservationEmail(reservation), EmailBodyLogic.getEmailEnd());
+            }
+            // Always send email to admin
+            EmailSender.sendEmail(adminEmail,
                     "Uusi varaus, " + reservation.getLName() + " "
                             + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
                     EmailBodyLogic.createReservationEmailBody(reservation), "");
         } catch (Exception ex) {
-            System.out.println("Email wasnt sent");
+            System.out.println("Email wasn't sent");
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
