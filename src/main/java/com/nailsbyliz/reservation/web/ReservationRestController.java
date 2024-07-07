@@ -304,13 +304,13 @@ public class ReservationRestController {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startTime = reservation.getStartTime();
         Duration duration = Duration.between(now, startTime);
+        if (!"ROLE_ADMIN".equalsIgnoreCase(userRole)) {
 
         if (duration.toHours() < 24) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Reservation cannot be canceled less than 24 hours before the start time.");
         }
 
-        if (!"ROLE_ADMIN".equalsIgnoreCase(userRole)) {
             if (!reservation.getCustomerId().equals(userId)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
             }
