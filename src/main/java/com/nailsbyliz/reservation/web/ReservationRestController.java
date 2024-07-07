@@ -28,6 +28,7 @@ import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationUserDTO;
+import com.nailsbyliz.reservation.email.EmailLogic;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
@@ -317,6 +318,7 @@ public class ReservationRestController {
         ReservationEntity result = reservationService.updateReservation(reservationId, reservation);
 
         if (result == null) {
+            EmailLogic.sendCancelledReservationEmail(result);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error canceling the reservation.");
         }
 
