@@ -127,6 +127,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         if (opitonalReservation.isPresent()) {
             ReservationEntity existingReservation = opitonalReservation.get();
+            existingReservation.setNailService(updatedReservation.getNailService());
             EmailLogic.sendEditedReservationEmail(existingReservation, updatedReservation);
             existingReservation.setFName(updatedReservation.getFName());
             existingReservation.setLName(updatedReservation.getLName());
@@ -137,7 +138,6 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setPostalcode(updatedReservation.getPostalcode());
             existingReservation.setPrice(updatedReservation.getPrice());
             existingReservation.setStartTime(updatedReservation.getStartTime());
-            existingReservation.setNailService(updatedReservation.getNailService());
             existingReservation.setStatus(updatedReservation.getStatus());
             existingReservation.setCustomerId(updatedReservation.getCustomerId());
 
