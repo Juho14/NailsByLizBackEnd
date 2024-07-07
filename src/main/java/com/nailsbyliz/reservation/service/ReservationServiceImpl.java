@@ -124,6 +124,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationEntity updateReservation(Long reservationId, ReservationEntity updatedReservation) {
         Optional<ReservationEntity> opitonalReservation = reservationRepository.findById(reservationId);
+        ReservationEntity originalReservation = getReservationById(reservationId);
         if (opitonalReservation.isPresent()) {
             ReservationEntity existingReservation = opitonalReservation.get();
             existingReservation.setFName(updatedReservation.getFName());
@@ -138,7 +139,6 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setStatus(updatedReservation.getStatus());
 
             ReservationEntity editedReservation = saveReservation(existingReservation);
-            ReservationEntity originalReservation = getReservationById(reservationId);
             originalReservation.setStatus(editedReservation.getStatus());
             System.out.println(originalReservation.toString());
             System.out.println(existingReservation.toString());
