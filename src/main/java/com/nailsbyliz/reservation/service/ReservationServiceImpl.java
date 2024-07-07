@@ -125,6 +125,17 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationEntity updateReservation(Long reservationId, ReservationEntity updatedReservation) {
         Optional<ReservationEntity> opitonalReservation = reservationRepository.findById(reservationId);
         ReservationEntity originalReservation = getReservationById(reservationId);
+        originalReservation.setStatus(updatedReservation.getStatus());
+        updatedReservation.setId(originalReservation.getId());
+
+        System.out.println(originalReservation.toString());
+        System.out.println(updatedReservation.toString());
+
+        boolean hasBeenUpdated = false;
+        if (originalReservation == updatedReservation) {
+            hasBeenUpdated = true;
+        }
+
         if (opitonalReservation.isPresent()) {
             ReservationEntity existingReservation = opitonalReservation.get();
             existingReservation.setFName(updatedReservation.getFName());
@@ -139,13 +150,10 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setStatus(updatedReservation.getStatus());
 
             ReservationEntity editedReservation = saveReservation(existingReservation);
-            originalReservation.setStatus(editedReservation.getStatus());
-            System.out.println(originalReservation.toString());
-            System.out.println(existingReservation.toString());
 
             if (editedReservation.getStatus().equalsIgnoreCase("Peruttu")) {
                 EmailLogic.sendCancelledReservationEmail(editedReservation);
-            } else if (originalReservation == editedReservation) {
+            } else if (!hasBeenUpdated) {
                 return editedReservation;
             } else {
                 EmailLogic.sendEditedReservationEmail(originalReservation, editedReservation);
