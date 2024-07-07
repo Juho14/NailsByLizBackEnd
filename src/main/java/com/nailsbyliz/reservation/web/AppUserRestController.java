@@ -82,7 +82,7 @@ public class AppUserRestController {
     public ResponseEntity<?> registerUser(@RequestBody AppUserEntity createdAppUser) {
         createdAppUser.setRole("ROLE_USER");
         AppUserEntity newAppUser = userService.createUser(createdAppUser);
-        EmailLogic.sendRegistrationEmail(newAppUser);
+        EmailLogic.sendRegistrationEmail(createdAppUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(newAppUser);
     }
 
