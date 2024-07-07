@@ -140,6 +140,8 @@ public class ReservationServiceImpl implements ReservationService {
             ReservationEntity editedReservation = saveReservation(existingReservation);
             ReservationEntity originalReservation = getReservationById(reservationId);
             originalReservation.setStatus(editedReservation.getStatus());
+            System.out.println(originalReservation.toString());
+            System.out.println(existingReservation.toString());
 
             if (editedReservation.getStatus().equalsIgnoreCase("Peruttu")) {
                 EmailLogic.sendCancelledReservationEmail(editedReservation);

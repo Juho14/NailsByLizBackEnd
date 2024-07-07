@@ -106,8 +106,12 @@ public class EmailLogic {
                                                 + "Kiitos asioinnista, toivottavasti näemme pian!");
         }
 
-        public static String getEmailEnd() {
+        public static String getReservationEmailEnd() {
                 return "Yhteyden otot ja kynsiehdotukset/ideat sähköpostitse info@nailsbyliz.fi tai <a href='https://www.instagram.com/nailsbyliz.fi'>Instagramissa @nailsbyliz.fi</a>";
+        }
+
+        public static String getEmailEnd() {
+                return "Yhteyden otot sähköpostitse info@nailsbyliz.fi tai <a href='https://www.instagram.com/nailsbyliz.fi'>Instagramissa @nailsbyliz.fi</a>";
         }
 
         public static void sendNewReservationEmails(ReservationEntity reservation) {
@@ -120,7 +124,7 @@ public class EmailLogic {
                                                                 + TimeUtil.formatToHelsinkiTime(
                                                                                 reservation.getStartTime()),
                                                 EmailLogic.createNewReservationEmail(reservation),
-                                                EmailLogic.getEmailEnd());
+                                                EmailLogic.getReservationEmailEnd());
                         }
                         // Always send email to admin
                         EmailSender.sendEmail(adminEmail,
@@ -133,15 +137,15 @@ public class EmailLogic {
         }
 
         public static void sendCancelledReservationEmail(ReservationEntity reservation) {
-                String adminEmail = System.getenv("EMAIL_ADMIN");
                 try {
+                        String adminEmail = System.getenv("EMAIL_ADMIN");
+
                         if (!reservation.getEmail().equalsIgnoreCase(adminEmail)) {
                                 EmailSender.sendEmail(reservation.getEmail(), "Varauksenne "
                                                 + TimeUtil.formatToHelsinkiTime(reservation.getStartTime())
                                                 + " on peruttu.",
-                                                "Varauksenne on peruttu:\n "
-                                                                + createCancelledReservationEmail(
-                                                                                reservation),
+                                                createCancelledReservationEmail(
+                                                                reservation),
                                                 getEmailEnd());
                         }
                         // Send an update to ADMIN
@@ -171,7 +175,7 @@ public class EmailLogic {
                                                                                                         .getStartTime()),
                                                         updatedReservationEmail(originalReservation,
                                                                         editedReservation),
-                                                        getEmailEnd());
+                                                        getReservationEmailEnd());
                                 }
                                 // Send an update to ADMIN
                                 EmailSender.sendEmail(adminEmail,
