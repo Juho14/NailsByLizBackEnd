@@ -132,6 +132,9 @@ public class ReservationServiceImpl implements ReservationService {
         if (opitonalReservation.isPresent()) {
             ReservationEntity existingReservation = opitonalReservation.get();
             updatedReservation.setNailService(nailService);
+            System.out.println(existingReservation.toString());
+            System.out.println(updatedReservation.toString());
+
             if (updatedReservation.getStatus().equalsIgnoreCase("Peruttu")
                     && existingReservation.getStatus().equalsIgnoreCase("OK")) {
                 EmailLogic.sendCancelledReservationEmail(existingReservation);
