@@ -102,8 +102,7 @@ public class EmailLogic {
                                 "Hei, varauksenne on peruttu.\n\n" +
                                                 createReservationEmailBody(reservation) +
                                                 "\n"
-                                                + "Mikäli teille tulee kysyttävää, olkaa yhteydessä info@nailsbyliz.fi.\n"
-                                                + "Kiitos asioinnista, toivottavasti näemme pian!");
+                                                + "Kiitos asioinnista, toivottavasti näemme pian!\n\n");
         }
 
         public static String getReservationEmailEnd() {
