@@ -154,7 +154,7 @@ public class EmailLogic {
                                                         + TimeUtil.formatToHelsinkiTime(
                                                                         reservation.getStartTime()),
                                         createReservationAdminEmailBody(reservation),
-                                        null);
+                                        "");
                 } catch (Exception ex) {
                         System.out.println("Email wasnt sent");
                 }
@@ -184,7 +184,7 @@ public class EmailLogic {
                                                                                 originalReservation.getStartTime()),
                                                 updatedReservationAdminEmail(originalReservation,
                                                                 editedReservation),
-                                                null);
+                                                "");
                         } catch (Exception ex) {
                                 System.out.println("Email wasnt sent");
                         }
@@ -196,7 +196,7 @@ public class EmailLogic {
                         EmailSender.sendEmail(newAppUser.getEmail(),
                                         "Nailzbyliz.fi rekisteröinti, " + newAppUser.getUsername(),
                                         "Hei, käyttäjänne on nyt rekisteröity. Jos et itse luonut tätä käyttäjää, laita sähköpostia osoitteeseen info@nailsbyliz.fi, ja poistamme tilin.",
-                                        null);
+                                        "");
                 } catch (Exception ex) {
                         System.out.println("Email wasnt sent");
                 }
@@ -207,7 +207,7 @@ public class EmailLogic {
                         EmailSender.sendEmail(deletedUser.getEmail(),
                                         "Nailzbyliz.fi käyttäjänne " + deletedUser.getUsername() + " on poistettu.",
                                         "Käyttäjänne on nyt poistettu. Harmi ettette halua enää asioida kanssamme, kiitos yhteisistä hetkistä!",
-                                        null);
+                                        "");
                 } catch (Exception ex) {
                         System.out.println("Email wasnt sent");
                 }
