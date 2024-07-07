@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ApiKeyInterceptor implements HandlerInterceptor {
 
     private static final String API_KEY_HEADER_NAME = "Api-Key";
-    // private static final String EXPECTED_API_KEY = "test-api-key";
+    // private static final String API_KEY = "test-api-key";
     private static final String API_KEY = System.getenv("CUSTOM_API_KEY");
 
     @Override

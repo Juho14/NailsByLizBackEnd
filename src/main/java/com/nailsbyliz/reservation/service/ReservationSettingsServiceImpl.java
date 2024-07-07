@@ -32,7 +32,7 @@ public class ReservationSettingsServiceImpl implements ReservationSettingsServic
     }
 
     @Override
-    public ReservationSettings findActiveReservation() {
+    public ReservationSettings findActiveReservationSetting() {
         Iterable<ReservationSettings> reservationSettings = settingsRepo.findAll();
 
         for (ReservationSettings r : reservationSettings) {

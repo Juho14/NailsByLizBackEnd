@@ -63,7 +63,7 @@ public class ReservationSettingsRestController {
     @GetMapping("/active")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getActiveReservation() {
-        ReservationSettings activeReservation = settingService.findActiveReservation();
+        ReservationSettings activeReservation = settingService.findActiveReservationSetting();
 
         if (activeReservation != null) {
             return ResponseEntity.ok(activeReservation);

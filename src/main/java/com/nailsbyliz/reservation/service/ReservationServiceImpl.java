@@ -12,15 +12,16 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.domain.ReservationSettings;
+import com.nailsbyliz.reservation.email.EmailBodyLogic;
+import com.nailsbyliz.reservation.email.EmailSender;
 import com.nailsbyliz.reservation.repositories.NailServiceRepository;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
+import com.nailsbyliz.reservation.util.TimeUtil;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -33,6 +34,38 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Autowired
     ReservationSettingsService reservationSettingsService;
+
+    @Override
+    public ReservationEntity newReservation(ReservationEntity reservation, String userRole) {
+        LocalDateTime currentDate = LocalDateTime.now();
+        // Admins can add reservations at a later date, users can only add future
+        // reservations.
+        if (!userRole.equalsIgnoreCase("ROLE_ADMIN") && reservation.getStartTime().isBefore(currentDate)) {
+            throw new IllegalArgumentException("Reservation date is in the past.");
+        }
+
+        ReservationEntity createdReservation = saveReservation(reservation);
+
+        try {
+            String adminEmail = System.getenv("EMAIL_ADMIN");
+            // Sending email to customer if not admin
+            if (!reservation.getEmail().equals(adminEmail)) {
+                EmailSender.sendEmail(reservation.getEmail(),
+                        "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
+                                + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
+                        EmailBodyLogic.createNewReservationEmail(reservation), EmailBodyLogic.getEmailEnd());
+            }
+            // Always send email to admin
+            EmailSender.sendEmail(adminEmail,
+                    "Uusi varaus, " + reservation.getLName() + " "
+                            + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
+                    EmailBodyLogic.createReservationEmailBody(reservation), "");
+        } catch (Exception ex) {
+            System.out.println("Email wasn't sent");
+        }
+
+        return createdReservation;
+    }
 
     @Override
     public ReservationEntity saveReservation(ReservationEntity reservation) {
@@ -49,7 +82,7 @@ public class ReservationServiceImpl implements ReservationService {
         // Retrieve active reservation settings to secure that all reservations are
         // within the open hours. Times are sent to the backend through the URL, so
         // malicious requests are blocked.
-        ReservationSettings activeSettings = reservationSettingsService.findActiveReservation();
+        ReservationSettings activeSettings = reservationSettingsService.findActiveReservationSetting();
         if (activeSettings == null) {
             throw new IllegalStateException("No active reservation settings available.");
         }
@@ -57,22 +90,6 @@ public class ReservationServiceImpl implements ReservationService {
         // Convert reservation times to system default zone to compare with settings
         LocalTime settingStartTime = activeSettings.getStartTime();
         LocalTime settingEndTime = activeSettings.getEndTime();
-        LocalDateTime currentDate = LocalDateTime.now();
-
-        // Retrieve the authentication object
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAdmin = false;
-
-        if (authentication != null) {
-            isAdmin = authentication.getAuthorities().stream()
-                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-        }
-
-        // Admins can add reservations at a later date, users can only add future
-        // reservations.
-        if (!isAdmin && reservation.getStartTime().isBefore(currentDate)) {
-            throw new IllegalArgumentException("Reservation date is in the past.");
-        }
 
         // Validate that reservation's startTime is within allowed settings time range.
         if (startTime.toLocalTime().isBefore(settingStartTime.minusMinutes(1)) ||
@@ -138,7 +155,33 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setStartTime(updatedReservation.getStartTime());
             existingReservation.setNailService(updatedReservation.getNailService());
             existingReservation.setStatus(updatedReservation.getStatus());
-            return saveReservation(existingReservation);
+
+            ReservationEntity editedReservation = saveReservation(existingReservation);
+            ReservationEntity originalReservation = getReservationById(reservationId);
+
+            if (editedReservation != null) {
+                String adminEmail = System.getenv("EMAIL_ADMIN");
+                try {
+                    if (!updatedReservation.getEmail().equalsIgnoreCase(adminEmail)) {
+                        EmailSender.sendEmail(updatedReservation.getEmail(),
+                                "Varuksenne tietoja muutettu, " + updatedReservation.getLName()
+                                        + TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
+                                EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation),
+                                EmailBodyLogic.getEmailEnd());
+                    }
+                    // Send an update to ADMIN
+                    EmailSender.sendEmail(adminEmail,
+                            "Varausta muutettu, " + updatedReservation.getLName()
+                                    + TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
+                            EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation),
+                            null);
+                } catch (Exception ex) {
+                    System.out.println("Email wasnt sent");
+                }
+                return editedReservation;
+            } else {
+                throw new NoSuchElementException("Reservation not found with id: " + reservationId);
+            }
         } else {
             throw new NoSuchElementException("Reservation not found with id: " + reservationId);
         }

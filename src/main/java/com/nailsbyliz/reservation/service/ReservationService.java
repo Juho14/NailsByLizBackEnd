@@ -6,6 +6,9 @@ import java.util.List;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 
 public interface ReservationService {
+
+    ReservationEntity newReservation(ReservationEntity reservation, String userRole);
+
     ReservationEntity saveReservation(ReservationEntity reservation);
 
     ReservationEntity getReservationById(Long reservationId);

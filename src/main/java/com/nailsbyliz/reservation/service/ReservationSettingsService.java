@@ -6,6 +6,6 @@ public interface ReservationSettingsService {
 
     void setActiveReservationSetting(Long id);
 
-    ReservationSettings findActiveReservation();
+    ReservationSettings findActiveReservationSetting();
 
 }

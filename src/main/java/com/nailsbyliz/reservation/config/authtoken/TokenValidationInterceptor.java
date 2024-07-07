@@ -30,16 +30,20 @@ public class TokenValidationInterceptor implements HandlerInterceptor {
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
 
+        // Extract the access token
+        String accessToken = jwtService.resolveAccessToken(request);
+
         // Check if the method is annotated with @PreAuthorize("permitAll()")
-        if (method.isAnnotationPresent(PreAuthorize.class)) {
+        // if the access token is present, authorize the user first.
+
+        if (method.isAnnotationPresent(PreAuthorize.class) && accessToken == null) {
             PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
             if (preAuthorize.value().equals("permitAll()")) {
                 return true;
             }
         }
 
-        // Extract and validate access token
-        String accessToken = jwtService.resolveAccessToken(request);
+        // Validate access token
         if (accessToken == null || !jwtService.validateToken(accessToken)) {
             System.out.println("Access token error");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token not provided or invalid");

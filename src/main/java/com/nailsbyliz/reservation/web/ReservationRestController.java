@@ -28,13 +28,9 @@ import com.nailsbyliz.reservation.dto.NailServiceCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationAdminDTO;
 import com.nailsbyliz.reservation.dto.ReservationCustomerDTO;
 import com.nailsbyliz.reservation.dto.ReservationUserDTO;
-import com.nailsbyliz.reservation.email.EmailBodyLogic;
-import com.nailsbyliz.reservation.email.EmailSender;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
 import com.nailsbyliz.reservation.service.AuthService;
 import com.nailsbyliz.reservation.service.ReservationService;
-import com.nailsbyliz.reservation.service.UserDetailServiceImpl;
-import com.nailsbyliz.reservation.util.TimeUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -257,25 +253,14 @@ public class ReservationRestController {
     // Create a new reservation
     @PostMapping
     @PreAuthorize("permitAll()")
-    public ResponseEntity<ReservationEntity> newReservation(@RequestBody ReservationEntity reservation) {
-        ReservationEntity createdReservation = reservationService.saveReservation(reservation);
-        try {
-            String adminEmail = System.getenv("EMAIL_ADMIN");
-            // Sending email to customer if not admin
-            if (!reservation.getEmail().equals(adminEmail)) {
-                EmailSender.sendEmail(reservation.getEmail(),
-                        "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
-                                + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                        EmailBodyLogic.createNewReservationEmail(reservation), EmailBodyLogic.getEmailEnd());
-            }
-            // Always send email to admin
-            EmailSender.sendEmail(adminEmail,
-                    "Uusi varaus, " + reservation.getLName() + " "
-                            + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createReservationEmailBody(reservation), "");
-        } catch (Exception ex) {
-            System.out.println("Email wasn't sent");
+    public ResponseEntity<ReservationEntity> newReservation(@RequestBody ReservationEntity reservation,
+            HttpServletRequest request) {
+        String token = jwtService.resolveAuthToken(request);
+        String userRole = "";
+        if (token != null) {
+            userRole = jwtService.getRoleFromToken(token);
         }
+        ReservationEntity createdReservation = reservationService.newReservation(reservation, userRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
@@ -290,17 +275,7 @@ public class ReservationRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
         ReservationEntity result = reservationService.updateReservation(reservationId, updatedReservation);
-        ReservationEntity originalReservation = reservationService.getReservationById(reservationId);
         if (result != null) {
-            try {
-                EmailSender.sendEmail(updatedReservation.getEmail(),
-                        "Varuksenne tietoja muutettu, " + updatedReservation.getLName()
-                                + TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
-                        EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation),
-                        EmailBodyLogic.getEmailEnd());
-            } catch (Exception ex) {
-                System.out.println("Email wasnt sent");
-            }
             return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.notFound().build();
