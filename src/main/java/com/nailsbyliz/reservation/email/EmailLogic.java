@@ -165,7 +165,8 @@ public class EmailLogic {
                 if (editedReservation != null) {
                         String adminEmail = System.getenv("EMAIL_ADMIN");
                         try {
-                                if (!editedReservation.getEmail().equalsIgnoreCase(adminEmail)) {
+                                if (!editedReservation.getEmail().equalsIgnoreCase(adminEmail)
+                                                && editedReservation.getStatus().equalsIgnoreCase("OK")) {
                                         EmailSender.sendEmail(editedReservation.getEmail(),
                                                         "Varuksenne tietoja muutettu, " + editedReservation.getLName()
                                                                         + ", "

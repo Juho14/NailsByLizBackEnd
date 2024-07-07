@@ -124,23 +124,14 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationEntity updateReservation(Long reservationId, ReservationEntity updatedReservation) {
         Optional<ReservationEntity> opitonalReservation = reservationRepository.findById(reservationId);
-        ReservationEntity originalReservation = getReservationById(reservationId);
-        originalReservation.setStatus(updatedReservation.getStatus());
-        updatedReservation.setId(originalReservation.getId());
-
-        System.out.println(originalReservation.toString());
-        System.out.println(updatedReservation.toString());
-
-        boolean hasBeenUpdated = false;
-        if (originalReservation == updatedReservation) {
-            hasBeenUpdated = true;
-        }
 
         if (opitonalReservation.isPresent()) {
             ReservationEntity existingReservation = opitonalReservation.get();
+            EmailLogic.sendEditedReservationEmail(existingReservation, updatedReservation);
             existingReservation.setFName(updatedReservation.getFName());
             existingReservation.setLName(updatedReservation.getLName());
             existingReservation.setEmail(updatedReservation.getEmail());
+            existingReservation.setPhone(updatedReservation.getPhone());
             existingReservation.setAddress(updatedReservation.getAddress());
             existingReservation.setCity(updatedReservation.getCity());
             existingReservation.setPostalcode(updatedReservation.getPostalcode());
@@ -148,21 +139,14 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setStartTime(updatedReservation.getStartTime());
             existingReservation.setNailService(updatedReservation.getNailService());
             existingReservation.setStatus(updatedReservation.getStatus());
+            existingReservation.setCustomerId(updatedReservation.getCustomerId());
 
             ReservationEntity editedReservation = saveReservation(existingReservation);
 
-            if (editedReservation.getStatus().equalsIgnoreCase("Peruttu")) {
-                EmailLogic.sendCancelledReservationEmail(editedReservation);
-            } else if (!hasBeenUpdated) {
-                return editedReservation;
-            } else {
-                EmailLogic.sendEditedReservationEmail(originalReservation, editedReservation);
-            }
             return editedReservation;
         } else {
             throw new NoSuchElementException("Reservation not found with id: " + reservationId);
         }
-
     }
 
     @Override
