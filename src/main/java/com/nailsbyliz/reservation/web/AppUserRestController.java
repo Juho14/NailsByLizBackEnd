@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nailsbyliz.reservation.config.authtoken.JwtService;
 import com.nailsbyliz.reservation.domain.AppUserEntity;
-import com.nailsbyliz.reservation.email.EmailSender;
+import com.nailsbyliz.reservation.email.EmailLogic;
 import com.nailsbyliz.reservation.repositories.AppUserRepository;
 import com.nailsbyliz.reservation.service.AppUserService;
 import com.nailsbyliz.reservation.service.AuthService;
@@ -82,14 +82,7 @@ public class AppUserRestController {
     public ResponseEntity<?> registerUser(@RequestBody AppUserEntity createdAppUser) {
         createdAppUser.setRole("ROLE_USER");
         AppUserEntity newAppUser = userService.createUser(createdAppUser);
-        try {
-            EmailSender.sendEmail(newAppUser.getEmail(),
-                    "Nailzbyliz.fi rekisteröinti, " + newAppUser.getLName(),
-                    "Hei, käyttäjänne on nyt rekisteröity. Jos et itse luonut tätä käyttäjää, laita sähköpostia osoitteeseen info@nailsbyliz.fi, ja poistamme tilin.",
-                    null);
-        } catch (Exception ex) {
-            System.out.println("Email wasnt sent");
-        }
+        EmailLogic.sendRegistrationEmail(newAppUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(newAppUser);
     }
 
@@ -112,6 +105,8 @@ public class AppUserRestController {
     public ResponseEntity<Void> deleteAppUser(HttpServletRequest request) {
         String token = jwtService.resolveAuthToken(request);
         Long userId = jwtService.getIdFromToken(token);
+        AppUserEntity toBeDeleted = userRepo.findById(userId).get();
+        EmailLogic.sendDeleteUserEmail(toBeDeleted);
         boolean deleted = userService.deleteUser(userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }

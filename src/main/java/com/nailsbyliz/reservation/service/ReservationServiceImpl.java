@@ -17,11 +17,9 @@ import org.springframework.stereotype.Service;
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
 import com.nailsbyliz.reservation.domain.ReservationEntity;
 import com.nailsbyliz.reservation.domain.ReservationSettings;
-import com.nailsbyliz.reservation.email.EmailBodyLogic;
-import com.nailsbyliz.reservation.email.EmailSender;
+import com.nailsbyliz.reservation.email.EmailLogic;
 import com.nailsbyliz.reservation.repositories.NailServiceRepository;
 import com.nailsbyliz.reservation.repositories.ReservationRepository;
-import com.nailsbyliz.reservation.util.TimeUtil;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -43,26 +41,9 @@ public class ReservationServiceImpl implements ReservationService {
         if (!userRole.equalsIgnoreCase("ROLE_ADMIN") && reservation.getStartTime().isBefore(currentDate)) {
             throw new IllegalArgumentException("Reservation date is in the past.");
         }
-
         ReservationEntity createdReservation = saveReservation(reservation);
 
-        try {
-            String adminEmail = System.getenv("EMAIL_ADMIN");
-            // Sending email to customer if not admin
-            if (!reservation.getEmail().equals(adminEmail)) {
-                EmailSender.sendEmail(reservation.getEmail(),
-                        "Nailzbyliz varausvavhistus, " + reservation.getLName() + " "
-                                + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                        EmailBodyLogic.createNewReservationEmail(reservation), EmailBodyLogic.getEmailEnd());
-            }
-            // Always send email to admin
-            EmailSender.sendEmail(adminEmail,
-                    "Uusi varaus, " + reservation.getLName() + " "
-                            + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                    EmailBodyLogic.createReservationEmailBody(reservation), "");
-        } catch (Exception ex) {
-            System.out.println("Email wasn't sent");
-        }
+        EmailLogic.sendNewReservationEmails(createdReservation);
 
         return createdReservation;
     }
@@ -158,33 +139,20 @@ public class ReservationServiceImpl implements ReservationService {
 
             ReservationEntity editedReservation = saveReservation(existingReservation);
             ReservationEntity originalReservation = getReservationById(reservationId);
+            originalReservation.setStatus(editedReservation.getStatus());
 
-            if (editedReservation != null) {
-                String adminEmail = System.getenv("EMAIL_ADMIN");
-                try {
-                    if (!updatedReservation.getEmail().equalsIgnoreCase(adminEmail)) {
-                        EmailSender.sendEmail(updatedReservation.getEmail(),
-                                "Varuksenne tietoja muutettu, " + updatedReservation.getLName()
-                                        + TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
-                                EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation),
-                                EmailBodyLogic.getEmailEnd());
-                    }
-                    // Send an update to ADMIN
-                    EmailSender.sendEmail(adminEmail,
-                            "Varausta muutettu, " + updatedReservation.getLName()
-                                    + TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
-                            EmailBodyLogic.updatedReservationEmail(originalReservation, updatedReservation),
-                            null);
-                } catch (Exception ex) {
-                    System.out.println("Email wasnt sent");
-                }
+            if (editedReservation.getStatus().equalsIgnoreCase("Peruttu")) {
+                EmailLogic.sendCancelledReservationEmail(editedReservation);
+            } else if (originalReservation == editedReservation) {
                 return editedReservation;
             } else {
-                throw new NoSuchElementException("Reservation not found with id: " + reservationId);
+                EmailLogic.sendEditedReservationEmail(originalReservation, editedReservation);
             }
+            return editedReservation;
         } else {
             throw new NoSuchElementException("Reservation not found with id: " + reservationId);
         }
+
     }
 
     @Override
