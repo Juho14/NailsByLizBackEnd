@@ -315,14 +315,10 @@ public class ReservationRestController {
         }
 
         reservation.setStatus("Peruttu");
-        ReservationEntity result = reservationService.updateReservation(reservationId, reservation);
+        reservationRepository.save(reservation);
+        EmailLogic.sendCancelledReservationEmail(reservation);
 
-        if (result == null) {
-            EmailLogic.sendCancelledReservationEmail(result);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error canceling the reservation.");
-        }
-
-        return ResponseEntity.ok(result.toString());
+        return ResponseEntity.ok(reservation.toString());
     }
 
     @DeleteMapping("/{reservationId}")
