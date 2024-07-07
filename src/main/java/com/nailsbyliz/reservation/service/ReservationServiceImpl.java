@@ -12,6 +12,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.nailsbyliz.reservation.domain.NailServiceEntity;
@@ -55,6 +57,22 @@ public class ReservationServiceImpl implements ReservationService {
         // Convert reservation times to system default zone to compare with settings
         LocalTime settingStartTime = activeSettings.getStartTime();
         LocalTime settingEndTime = activeSettings.getEndTime();
+        LocalDateTime currentDate = LocalDateTime.now();
+
+        // Retrieve the authentication object
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = false;
+
+        if (authentication != null) {
+            isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        }
+
+        // Admins can add reservations at a later date, users can only add future
+        // reservations.
+        if (!isAdmin && reservation.getStartTime().isBefore(currentDate)) {
+            throw new IllegalArgumentException("Reservation date is in the past.");
+        }
 
         // Validate that reservation's startTime is within allowed settings time range.
         if (startTime.toLocalTime().isBefore(settingStartTime.minusMinutes(1)) ||
