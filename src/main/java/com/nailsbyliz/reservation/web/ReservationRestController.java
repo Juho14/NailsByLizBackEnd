@@ -310,8 +310,10 @@ public class ReservationRestController {
                     .body("Reservation cannot be canceled less than 24 hours before the start time.");
         }
 
-        if (!reservation.getCustomerId().equals(userId) && !"ROLE_ADMIN".equals(userRole)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+        if (!"ROLE_ADMIN".equalsIgnoreCase(userRole)) {
+            if (!reservation.getCustomerId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+            }
         }
 
         reservation.setStatus("Peruttu");
