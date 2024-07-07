@@ -92,7 +92,7 @@ public class EmailLogic {
                         ReservationEntity updatedReservation) {
                 return String.format(
                                 "Varausta (%s) on muutettu.\n\nVanhat tiedot:\n%s\nPäivitetyt tiedot:\n%s",
-                                TimeUtil.formatToHelsinkiTime(updatedReservation.getStartTime()),
+                                TimeUtil.formatToHelsinkiTime(originalReservation.getStartTime()),
                                 createReservationAdminEmailBody(originalReservation),
                                 createReservationAdminEmailBody(updatedReservation));
         }
@@ -166,7 +166,8 @@ public class EmailLogic {
                         String adminEmail = System.getenv("EMAIL_ADMIN");
                         try {
                                 if (!editedReservation.getEmail().equalsIgnoreCase(adminEmail)
-                                                && editedReservation.getStatus().equalsIgnoreCase("OK")) {
+                                                && editedReservation.getStatus().equalsIgnoreCase("OK")
+                                                && originalReservation.getStatus().equalsIgnoreCase("OK")) {
                                         EmailSender.sendEmail(editedReservation.getEmail(),
                                                         "Varuksenne tietoja muutettu, " + editedReservation.getLName()
                                                                         + ", "
@@ -179,7 +180,7 @@ public class EmailLogic {
                                 }
                                 // Send an update to ADMIN
                                 EmailSender.sendEmail(adminEmail,
-                                                "Varausta muutettu, " + editedReservation.getLName()
+                                                "Varausta muutettu, " + editedReservation.getLName() + " "
                                                                 + TimeUtil.formatToHelsinkiTime(
                                                                                 originalReservation.getStartTime()),
                                                 updatedReservationAdminEmail(originalReservation,

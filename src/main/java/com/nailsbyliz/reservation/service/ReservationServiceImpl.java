@@ -125,10 +125,15 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationEntity updateReservation(Long reservationId, ReservationEntity updatedReservation) {
         Optional<ReservationEntity> opitonalReservation = reservationRepository.findById(reservationId);
 
+        Long serviceId = updatedReservation.getNailService().getId();
+        NailServiceEntity nailService = nailRepo.findById(serviceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Nail Service ID"));
+
         if (opitonalReservation.isPresent()) {
             ReservationEntity existingReservation = opitonalReservation.get();
-            existingReservation.setNailService(updatedReservation.getNailService());
+            updatedReservation.setNailService(nailService);
             EmailLogic.sendEditedReservationEmail(existingReservation, updatedReservation);
+            existingReservation.setNailService(nailService);
             existingReservation.setFName(updatedReservation.getFName());
             existingReservation.setLName(updatedReservation.getLName());
             existingReservation.setEmail(updatedReservation.getEmail());
