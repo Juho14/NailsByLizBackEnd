@@ -26,7 +26,8 @@ public class EmailLogic {
                                                 "Palvelu: %s\n" +
                                                 "Hinta: %.2f EUR\n" +
                                                 "Ajankohta: %s\n" +
-                                                "Arvioitu kesto: %s\n",
+                                                "Arvioitu kesto: %s\n" +
+                                                "Varauksen lisätiedot: %s\n",
                                 reservation.getFName(), reservation.getLName(),
                                 reservation.getPhone(),
                                 reservation.getEmail(),
@@ -35,7 +36,7 @@ public class EmailLogic {
                                                 : "Ei määritelty",
                                 reservation.getPrice(),
                                 TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                                durationText);
+                                durationText, reservation.getInfo());
         }
 
         public static String createReservationAdminEmailBody(ReservationEntity reservation) {
@@ -59,6 +60,7 @@ public class EmailLogic {
                                                 "Hinta: %.2f EUR\n" +
                                                 "Ajankohta: %s\n" +
                                                 "Arvioitu kesto: %s\n" +
+                                                "Varauksen lisätiedot: %s\n" +
                                                 "Varauksen status: %s\n",
                                 reservation.getFName(), reservation.getLName(),
                                 reservation.getPhone(),
@@ -68,7 +70,7 @@ public class EmailLogic {
                                                 : "Ei määritelty",
                                 reservation.getPrice(),
                                 TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                                durationText, reservation.getStatus());
+                                durationText, reservation.getInfo(), reservation.getStatus());
         }
 
         public static String createNewReservationEmail(ReservationEntity reservation) {
@@ -76,7 +78,7 @@ public class EmailLogic {
                                 "Hei, kiitos varauksestasi!\n\n" +
                                                 createReservationEmailBody(reservation) +
                                                 "\n"
-                                                + "Varauksen paikka on Tikkurilassa Tikkuraitin vieressä. \nTarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n\n");
+                                                + "Varauksen paikka on Kivenlahdessa metroaseman vieressä. \nTarkka osoite ilmoitetaan teille varausta edeltävänä päivänä!\n\n");
         }
 
         public static String updatedReservationEmail(ReservationEntity originalReservation,
@@ -116,6 +118,12 @@ public class EmailLogic {
         public static void sendNewReservationEmails(ReservationEntity reservation) {
                 try {
                         String adminEmail = System.getenv("EMAIL_ADMIN");
+                        // Always send email to admin
+                        EmailSender.sendEmail(adminEmail,
+                                        "Uusi varaus, " + reservation.getLName() + " "
+                                                        + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
+                                        EmailLogic.createReservationAdminEmailBody(reservation), "");
+
                         // Sending email to customer if not admin
                         if (!reservation.getEmail().equals(adminEmail)) {
                                 EmailSender.sendEmail(reservation.getEmail(),
@@ -125,11 +133,6 @@ public class EmailLogic {
                                                 EmailLogic.createNewReservationEmail(reservation),
                                                 EmailLogic.getReservationEmailEnd());
                         }
-                        // Always send email to admin
-                        EmailSender.sendEmail(adminEmail,
-                                        "Uusi varaus, " + reservation.getLName() + " "
-                                                        + TimeUtil.formatToHelsinkiTime(reservation.getStartTime()),
-                                        EmailLogic.createReservationAdminEmailBody(reservation), "");
                 } catch (Exception ex) {
                         System.out.println("Email wasn't sent");
                 }

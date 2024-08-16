@@ -9,6 +9,7 @@ public class ReservationUserDTO {
     private double price;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String info;
     private NailServiceCustomerDTO nailService;
 
     public Long getId() {
@@ -57,6 +58,14 @@ public class ReservationUserDTO {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    public String getInfo() {
+        return this.info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 
     public NailServiceCustomerDTO getNailService() {

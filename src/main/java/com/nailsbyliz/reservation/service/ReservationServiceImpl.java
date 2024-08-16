@@ -63,6 +63,7 @@ public class ReservationServiceImpl implements ReservationService {
         // Retrieve active reservation settings to secure that all reservations are
         // within the open hours. Times are sent to the backend through the URL, so
         // malicious requests are blocked.
+
         ReservationSettings activeSettings = reservationSettingsService.findActiveReservationSetting();
         if (activeSettings == null) {
             throw new IllegalStateException("No active reservation settings available.");
@@ -144,6 +145,7 @@ public class ReservationServiceImpl implements ReservationService {
             existingReservation.setPrice(updatedReservation.getPrice());
             existingReservation.setStartTime(updatedReservation.getStartTime());
             existingReservation.setStatus(updatedReservation.getStatus());
+            existingReservation.setInfo(updatedReservation.getInfo());
             existingReservation.setCustomerId(updatedReservation.getCustomerId());
 
             ReservationEntity editedReservation = saveReservation(existingReservation);

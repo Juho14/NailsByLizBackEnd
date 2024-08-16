@@ -19,6 +19,7 @@ public class ReservationAdminDTO {
     private NailServiceEntity nailService;
     private Long customerId;
     private String status;
+    private String info;
 
     public Long getId() {
         return this.id;
@@ -130,6 +131,14 @@ public class ReservationAdminDTO {
 
     public void setCustomerId(Long customerId) {
         this.customerId = customerId;
+    }
+
+    public String getInfo() {
+        return this.info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 
 }

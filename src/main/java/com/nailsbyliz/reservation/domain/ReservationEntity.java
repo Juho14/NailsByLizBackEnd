@@ -35,6 +35,7 @@ public class ReservationEntity {
 
     private Long customerId;
     private String status;
+    private String info;
 
     public ReservationEntity() {
     }
@@ -42,7 +43,7 @@ public class ReservationEntity {
     public ReservationEntity(String fName, String lName, String email, String phone, String address, String city,
             String postalcode, double price, LocalDateTime startTime, LocalDateTime endTime,
             NailServiceEntity nailService, Long customerId,
-            String status) {
+            String status, String info) {
         this.fName = fName;
         this.lName = lName;
         this.email = email;
@@ -56,6 +57,7 @@ public class ReservationEntity {
         this.nailService = nailService;
         this.customerId = customerId;
         this.status = status;
+        this.info = info;
     }
 
     public Long getId() {
@@ -170,6 +172,14 @@ public class ReservationEntity {
         this.postalcode = postalcode;
     }
 
+    public String getInfo() {
+        return this.info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
     @Override
     public String toString() {
         return "{" +
@@ -181,10 +191,14 @@ public class ReservationEntity {
                 ", address='" + getAddress() + "'" +
                 ", city='" + getCity() + "'" +
                 ", postalcode='" + getPostalcode() + "'" +
+                ", price='" + getPrice() + "'" +
                 ", startTime='" + getStartTime() + "'" +
                 ", endTime='" + getEndTime() + "'" +
                 ", nailService='" + getNailService() + "'" +
+                ", customerId='" + getCustomerId() + "'" +
                 ", status='" + getStatus() + "'" +
+                ", info='" + getInfo() + "'" +
                 "}";
     }
+
 }
