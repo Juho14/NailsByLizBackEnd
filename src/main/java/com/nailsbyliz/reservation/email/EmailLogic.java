@@ -27,7 +27,7 @@ public class EmailLogic {
                                                 "Hinta: %.2f EUR\n" +
                                                 "Ajankohta: %s\n" +
                                                 "Arvioitu kesto: %s\n" +
-                                                "Varauksen lisätiedot: %s\n",
+                                                "Toive/lisätiedot: %s\n",
                                 reservation.getFName(), reservation.getLName(),
                                 reservation.getPhone(),
                                 reservation.getEmail(),
@@ -60,7 +60,7 @@ public class EmailLogic {
                                                 "Hinta: %.2f EUR\n" +
                                                 "Ajankohta: %s\n" +
                                                 "Arvioitu kesto: %s\n" +
-                                                "Varauksen lisätiedot: %s\n" +
+                                                "Varauksen toive/lisätiedot: %s\n" +
                                                 "Varauksen status: %s\n",
                                 reservation.getFName(), reservation.getLName(),
                                 reservation.getPhone(),
@@ -153,7 +153,7 @@ public class EmailLogic {
                         // Send an update to ADMIN
                         EmailSender.sendEmail(adminEmail,
                                         "Varaus peruttu, " + reservation.getLName()
-                                              + " "
+                                                        + " "
                                                         + TimeUtil.formatToHelsinkiTime(
                                                                         reservation.getStartTime()),
                                         createReservationAdminEmailBody(reservation),
