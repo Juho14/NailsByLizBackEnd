@@ -153,6 +153,7 @@ public class EmailLogic {
                         // Send an update to ADMIN
                         EmailSender.sendEmail(adminEmail,
                                         "Varaus peruttu, " + reservation.getLName()
+                                              + " "
                                                         + TimeUtil.formatToHelsinkiTime(
                                                                         reservation.getStartTime()),
                                         createReservationAdminEmailBody(reservation),
